@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #faf6ec;
+  --surface: #fefcf7;
+  --ink: #141414;
+  --shadow: #141414;
+  --fg: #3a3a3a;
+  --accent: #0f766e;
+  --on-accent: #ffffff;
+  --highlight: #f59e0b;
+  --muted: #6b6b6b;
+}
+
+.dark {
+  --paper: #15130d;
+  --surface: #201d14;
+  --ink: #ede9e0;
+  --shadow: #7a766c;
+  --fg: #cfcabf;
+  --accent: #14b8a6;
+  --on-accent: #141414;
+  --highlight: #fbbf24;
+  --muted: #948e82;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--fg);
+  /* Subtle graph-paper grid behind the page (theme-aware via --ink). */
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-attachment: fixed;
+}
+
+/* Furigana: keep ruby text compact and readable. */
+ruby rt {
+  font-size: 0.5em;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
