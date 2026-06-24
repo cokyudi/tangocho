@@ -8,7 +8,7 @@
   --ink: #141414;
   --shadow: #141414;
   --fg: #3a3a3a;
-  --accent: #0f766e;
+  --accent: #c43e1c; /* vermilion 朱色 — tangocho brand (distinct from portfolio teal) */
   --on-accent: #ffffff;
   --highlight: #f59e0b;
   --muted: #6b6b6b;
@@ -20,7 +20,7 @@
   --ink: #ede9e0;
   --shadow: #7a766c;
   --fg: #cfcabf;
-  --accent: #14b8a6;
+  --accent: #f26a47; /* vermilion 朱色 (dark) */
   --on-accent: #141414;
   --highlight: #fbbf24;
   --muted: #948e82;
