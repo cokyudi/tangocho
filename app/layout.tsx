@@ -26,10 +26,6 @@ export const metadata: Metadata = {
   },
   description: 'Personal Japanese vocabulary notebook — capture, browse, and review words with spaced repetition.',
   manifest: '/manifest.webmanifest',
-  icons: {
-    icon: '/icons/icon-192.png',
-    apple: '/icons/apple-touch-icon.png',
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
