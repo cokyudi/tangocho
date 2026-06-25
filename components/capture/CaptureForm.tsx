@@ -1,15 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sparkles, Loader2, Check } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
-import { SOURCE_TYPES, SOURCE_TYPE_LABELS, type SourceType } from '@/constants/sources';
 import { saveWord } from '@/app/(app)/capture/actions';
 import type { EnrichResult } from '@/lib/enrich/schema';
-
-type Source = { id: string; type: string; name: string; detail: string | null };
+import SourceField, { type Source, type SourceSelection } from '@/components/SourceField';
 
 const inputClass =
   'w-full border-2 border-ink bg-surface px-3 py-2 text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent';
@@ -34,14 +32,8 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
   const [error, setError] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState(0);
 
-  // Source selection
-  const [sourceMode, setSourceMode] = useState<'existing' | 'new'>(
-    sources.length ? 'existing' : 'new',
-  );
-  const [sourceId, setSourceId] = useState<string>('');
-  const [newType, setNewType] = useState<SourceType>('drama');
-  const [newName, setNewName] = useState('');
-  const [newDetail, setNewDetail] = useState('');
+  // Source selection (kept across saves for fast consecutive adds)
+  const [source, setSource] = useState<SourceSelection>({ sourceId: null, newSource: null });
 
   const termRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,12 +42,6 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
   useEffect(() => {
     termRef.current?.focus();
   }, []);
-
-  const groupedSources = useMemo(() => {
-    const groups: Record<string, Source[]> = {};
-    for (const s of sources) (groups[s.type] ??= []).push(s);
-    return groups;
-  }, [sources]);
 
   const set = (k: keyof typeof empty, v: string) => setFields((f) => ({ ...f, [k]: v }));
 
@@ -110,11 +96,8 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
     const result = await saveWord({
       term,
       ...fields,
-      sourceId: sourceMode === 'existing' && sourceId ? sourceId : null,
-      newSource:
-        sourceMode === 'new' && newName.trim()
-          ? { type: newType, name: newName, detail: newDetail }
-          : null,
+      sourceId: source.sourceId,
+      newSource: source.newSource,
     });
     setSaving(false);
     if (!result.ok) {
@@ -214,47 +197,8 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
       </Card>
 
       {/* Source */}
-      <Card className="space-y-3 p-4">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-display font-bold uppercase tracking-wide text-muted">
-            Where did you learn it?
-          </label>
-          <button
-            type="button"
-            onClick={() => setSourceMode((m) => (m === 'existing' ? 'new' : 'existing'))}
-            className="font-display text-xs font-bold text-accent underline"
-          >
-            {sourceMode === 'existing' ? '+ New source' : 'Pick existing'}
-          </button>
-        </div>
-
-        {sourceMode === 'existing' ? (
-          <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} className={inputClass}>
-            <option value="">— none —</option>
-            {SOURCE_TYPES.filter((t) => groupedSources[t]?.length).map((t) => (
-              <optgroup key={t} label={SOURCE_TYPE_LABELS[t]}>
-                {groupedSources[t].map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                    {s.detail ? ` — ${s.detail}` : ''}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            <select value={newType} onChange={(e) => setNewType(e.target.value as SourceType)} className={inputClass}>
-              {SOURCE_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {SOURCE_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
-            <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Name (e.g. Midnight Diner)" className={inputClass} />
-            <input value={newDetail} onChange={(e) => setNewDetail(e.target.value)} placeholder="Detail (e.g. S2 Ep.3)" className={`${inputClass} col-span-2`} />
-          </div>
-        )}
+      <Card className="p-4">
+        <SourceField sources={sources} value={source} onChange={setSource} />
       </Card>
 
       {error && <p className="text-sm font-display font-bold text-accent">{error}</p>}
