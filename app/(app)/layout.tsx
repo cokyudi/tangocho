@@ -1,7 +1,15 @@
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import { createClient } from '@/lib/supabase/server';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo' }).format(new Date());
+  const { count } = await supabase
+    .from('words')
+    .select('id', { count: 'exact', head: true })
+    .or(`due_date.is.null,due_date.lte.${today}`);
+
   return (
     <>
       <a
@@ -14,7 +22,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main id="main-content" className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-6">
         {children}
       </main>
-      <BottomNav />
+      <BottomNav dueCount={count ?? 0} />
     </>
   );
 }

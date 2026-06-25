@@ -10,7 +10,7 @@ const tabs = [
   { href: '/practice', label: 'Practice', Icon: Layers },
 ];
 
-export default function BottomNav() {
+export default function BottomNav({ dueCount = 0 }: { dueCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -27,7 +27,14 @@ export default function BottomNav() {
                   active ? 'text-accent' : 'text-muted hover:text-ink'
                 }`}
               >
-                <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
+                <span className="relative">
+                  <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} />
+                  {href === '/practice' && dueCount > 0 && (
+                    <span className="absolute -right-2.5 -top-2 inline-flex h-4 min-w-4 items-center justify-center border-2 border-ink bg-accent px-1 text-[10px] font-bold leading-none text-on-accent">
+                      {dueCount > 99 ? '99+' : dueCount}
+                    </span>
+                  )}
+                </span>
                 {label}
               </Link>
             </li>
