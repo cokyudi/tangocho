@@ -5,7 +5,7 @@ export const metadata = { title: 'Not allowed' };
 
 export default function DeniedPage() {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-6 px-4 text-center">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-6 px-4 text-center">
       <h1 className="font-display text-3xl font-bold text-ink">
         Sorry, this one&apos;s private <span className="text-accent">🔒</span>
       </h1>
@@ -16,6 +16,6 @@ export default function DeniedPage() {
         </p>
         <SignOutButton variant="accent" className="w-full" />
       </Card>
-    </div>
+    </main>
   );
 }

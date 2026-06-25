@@ -24,7 +24,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-8 px-4">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-8 px-4">
       <div className="text-center">
         <h1 className="font-display text-4xl font-bold text-ink">
           tangocho<span className="ml-1 text-accent">単語帳</span>
@@ -39,6 +39,6 @@ export default function LoginPage() {
         </Button>
         {error && <p className="text-sm text-accent">{error}</p>}
       </Card>
-    </div>
+    </main>
   );
 }
