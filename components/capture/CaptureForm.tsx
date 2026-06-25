@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Sparkles, Loader2, Check } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -8,6 +8,7 @@ import Badge from '@/components/ui/Badge';
 import { saveWord } from '@/app/(app)/capture/actions';
 import type { EnrichResult } from '@/lib/enrich/schema';
 import SourceField, { type Source, type SourceSelection } from '@/components/SourceField';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 
 const inputClass =
   'w-full border-2 border-ink bg-surface px-3 py-2 text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent';
@@ -36,7 +37,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
   const [source, setSource] = useState<SourceSelection>({ sourceId: null, newSource: null });
 
   const termRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const composingRef = useRef(false); // true while an IME composition is in progress
   const lastEnriched = useRef<string>('');
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
 
   const set = (k: keyof typeof empty, v: string) => setFields((f) => ({ ...f, [k]: v }));
 
-  async function enrich(value: string) {
+  const enrich = useCallback(async (value: string) => {
     const t = value.trim();
     if (!t || t === lastEnriched.current) return;
     lastEnriched.current = t;
@@ -76,14 +77,15 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
     } finally {
       setEnriching(false);
     }
-  }
+  }, []);
 
-  function onTermChange(value: string) {
-    setTerm(value);
-    setEnrichedFrom(null);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => enrich(value), 700);
-  }
+  // Auto-enrich only once typing has settled (and not mid-IME-composition),
+  // so we don't spend Gemini/Jisho calls on every keystroke.
+  const debouncedTerm = useDebounce(term, 800);
+  useEffect(() => {
+    if (composingRef.current) return;
+    enrich(debouncedTerm);
+  }, [debouncedTerm, enrich]);
 
   async function onSave() {
     if (!term.trim()) {
@@ -133,9 +135,19 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
           <input
             ref={termRef}
             value={term}
-            onChange={(e) => onTermChange(e.target.value)}
+            onChange={(e) => {
+              setTerm(e.target.value);
+              setEnrichedFrom(null);
+            }}
+            onCompositionStart={() => {
+              composingRef.current = true;
+            }}
+            onCompositionEnd={(e) => {
+              composingRef.current = false;
+              setTerm(e.currentTarget.value);
+            }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && !composingRef.current) {
                 e.preventDefault();
                 enrich(term);
               }
