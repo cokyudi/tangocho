@@ -33,13 +33,20 @@ export default async function Home() {
         <p className="text-muted">Capture a word the moment you hear it.</p>
       </section>
 
-      <section className="grid grid-cols-3 gap-3">
-        {stats.map((s) => (
-          <Card key={s.label} className="flex flex-col items-center gap-1 p-4">
-            <span className="font-display text-2xl font-bold text-ink">{s.value}</span>
-            <span className="text-center text-xs text-muted">{s.label}</span>
-          </Card>
-        ))}
+      <section className="space-y-2">
+        <Link href="/progress" className="grid grid-cols-3 gap-3">
+          {stats.map((s) => (
+            <Card key={s.label} className="flex flex-col items-center gap-1 p-4 transition-transform hover:-translate-y-0.5">
+              <span className="font-display text-2xl font-bold text-ink">{s.value}</span>
+              <span className="text-center text-xs text-muted">{s.label}</span>
+            </Card>
+          ))}
+        </Link>
+        <p className="text-right">
+          <Link href="/progress" className="font-display text-sm font-bold text-accent">
+            View progress →
+          </Link>
+        </p>
       </section>
 
       <section className="flex flex-col gap-3 sm:flex-row">

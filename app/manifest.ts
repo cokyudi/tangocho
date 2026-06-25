@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
 
-// Minimal manifest for installability. Icons are added in Phase 5.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'tangocho — Japanese vocabulary notebook',
@@ -9,7 +8,12 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     background_color: '#faf6ec',
-    theme_color: '#faf6ec',
+    theme_color: '#c43e1c',
     lang: 'ja',
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
   };
 }

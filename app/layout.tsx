@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { Noto_Sans_JP, Space_Grotesk } from 'next/font/google';
 import type { Metadata, Viewport } from 'next';
 import Providers from '@/app/providers';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ['latin'],
@@ -25,6 +26,10 @@ export const metadata: Metadata = {
   },
   description: 'Personal Japanese vocabulary notebook — capture, browse, and review words with spaced repetition.',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/apple-touch-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -49,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning className="flex min-h-screen flex-col font-sans">
         <Providers>
           {children}
+          <ServiceWorkerRegister />
         </Providers>
       </body>
     </html>
