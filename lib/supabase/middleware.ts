@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isAllowedEmail } from '@/lib/auth';
 
 // Paths reachable without an authenticated, allowlisted session.
-const PUBLIC_PATHS = ['/login', '/denied', '/auth', '/offline'];
+const PUBLIC_PATHS = ['/login', '/denied', '/auth', '/offline', '/about'];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -53,7 +53,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    // Guests landing on the root see the public showcase; everything else
+    // routes to sign-in.
+    return NextResponse.redirect(new URL(pathname === '/' ? '/about' : '/login', request.url));
   }
 
   if (!isAllowedEmail(user.email)) {
