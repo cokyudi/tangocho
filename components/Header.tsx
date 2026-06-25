@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ThemeSwitch from '@/components/ThemeSwitch';
+import HeaderSignOut from '@/components/HeaderSignOut';
 
 export default function Header() {
   return (
@@ -8,7 +9,10 @@ export default function Header() {
         <Link href="/" className="font-display text-xl font-bold text-ink">
           tangocho<span className="ml-1 text-accent">単語帳</span>
         </Link>
-        <ThemeSwitch />
+        <div className="flex items-center gap-2">
+          <ThemeSwitch />
+          <HeaderSignOut />
+        </div>
       </div>
     </header>
   );

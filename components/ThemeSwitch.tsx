@@ -7,6 +7,8 @@ export default function ThemeSwitch() {
   const [mounted, setMounted] = useState(false);
   const { setTheme, resolvedTheme } = useTheme();
 
+  // Avoid hydration mismatch: only render the resolved theme after mount.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) return <div className="h-11 w-11" aria-hidden />;

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // CommonJS config files (require/module.exports are intentional).
+    "*.config.js",
+    "supabase/**",
   ]),
 ]);
 
