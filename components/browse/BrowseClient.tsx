@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { LayoutGrid, Table as TableIcon, Search, Pencil } from 'lucide-react';
+import { LayoutGrid, Table as TableIcon, Search, ChevronRight } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Furigana from '@/components/Furigana';
 import EditWordModal from '@/components/browse/EditWordModal';
+import WordDetailSheet from '@/components/browse/WordDetailSheet';
 import type { Source } from '@/components/SourceField';
 import type { BrowseWord } from '@/components/browse/types';
 import {
@@ -38,6 +39,7 @@ export default function BrowseClient({
   const [sourceFilter, setSourceFilter] = useState('');
   const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | ''>('');
   const [dueOnly, setDueOnly] = useState(false);
+  const [viewing, setViewing] = useState<BrowseWord | null>(null);
   const [editing, setEditing] = useState<BrowseWord | null>(null);
 
   useEffect(() => {
@@ -148,18 +150,13 @@ export default function BrowseClient({
           {filtered.map((w) => {
             const level = masteryLevel(w);
             return (
-              <Card key={w.id} className="space-y-2 p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <Furigana term={w.term} reading={w.reading} className="text-2xl text-ink" />
-                  <button
-                    type="button"
-                    aria-label="Edit"
-                    onClick={() => setEditing(w)}
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center border-2 border-ink bg-surface shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                </div>
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => setViewing(w)}
+                className="block w-full space-y-2 border-2 border-ink bg-surface p-4 text-left shadow-retro transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <Furigana term={w.term} reading={w.reading} className="text-2xl text-ink" />
                 {w.meaning_id && <p className="text-ink">{w.meaning_id}</p>}
                 {w.meaning_en && <p className="text-sm text-muted">{w.meaning_en}</p>}
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -168,7 +165,7 @@ export default function BrowseClient({
                   {w.jlpt && <Badge variant="neutral">{w.jlpt}</Badge>}
                   {sourceLabel(w.source_id) && <Badge variant="neutral">{sourceLabel(w.source_id)}</Badge>}
                 </div>
-              </Card>
+              </button>
             );
           })}
         </div>
@@ -177,7 +174,12 @@ export default function BrowseClient({
           {filtered.map((w) => {
             const level = masteryLevel(w);
             return (
-              <div key={w.id} className="flex items-center gap-3 p-3">
+              <button
+                key={w.id}
+                type="button"
+                onClick={() => setViewing(w)}
+                className="flex w-full items-center gap-3 p-3 text-left hover:bg-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+              >
                 <div className="min-w-0 flex-1">
                   <Furigana term={w.term} reading={w.reading} className="text-xl text-ink" />
                   <p className="truncate text-sm text-muted">
@@ -189,18 +191,23 @@ export default function BrowseClient({
                     {sourceLabel(w.source_id) && <Badge variant="neutral">{sourceLabel(w.source_id)}</Badge>}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  aria-label="Edit"
-                  onClick={() => setEditing(w)}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center border-2 border-ink bg-surface shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-              </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted" />
+              </button>
             );
           })}
         </Card>
+      )}
+
+      {viewing && (
+        <WordDetailSheet
+          word={viewing}
+          sourceLabel={sourceLabel(viewing.source_id)}
+          onClose={() => setViewing(null)}
+          onEdit={() => {
+            setEditing(viewing);
+            setViewing(null);
+          }}
+        />
       )}
 
       {editing && (
