@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -10,6 +11,12 @@ export const metadata: Metadata = {
   description:
     'A personal Japanese vocabulary tracker: capture words with AI auto-fill, remember where you learned them, and review with spaced repetition.',
 };
+
+const shots = [
+  { src: '/screenshots/capture.png', alt: 'Capture screen auto-filling a word', caption: 'Capture · AI auto-fill' },
+  { src: '/screenshots/practice.png', alt: 'Practice flashcard', caption: 'Practice · SM-2 flashcards' },
+  { src: '/screenshots/home.png', alt: 'Home dashboard with stats and recent words', caption: 'Home · progress at a glance' },
+];
 
 const features = [
   {
@@ -84,6 +91,28 @@ export default function AboutPage() {
               <p className="text-sm text-muted">{f.body}</p>
             </Card>
           ))}
+        </section>
+
+        {/* Screenshots */}
+        <section className="space-y-4">
+          <h2 className="font-display text-2xl font-bold text-ink">See it in action</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {shots.map((s) => (
+              <figure key={s.src} className="space-y-2">
+                <div className="overflow-hidden border-2 border-ink shadow-retro">
+                  <Image
+                    src={s.src}
+                    alt={s.alt}
+                    width={432}
+                    height={936}
+                    className="h-auto w-full"
+                    sizes="(min-width: 640px) 33vw, 100vw"
+                  />
+                </div>
+                <figcaption className="text-center text-xs text-muted">{s.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
         </section>
 
         {/* How it's built */}
