@@ -14,8 +14,11 @@ export const metadata: Metadata = {
 
 const shots = [
   { src: '/screenshots/capture.png', alt: 'Capture screen auto-filling a word', caption: 'Capture · AI auto-fill' },
+  { src: '/screenshots/browse.png', alt: 'Browse list with filters', caption: 'Browse · filter & search' },
+  { src: '/screenshots/detail.png', alt: 'Word detail with furigana example', caption: 'Detail · meaning, example, source' },
   { src: '/screenshots/practice.png', alt: 'Practice flashcard', caption: 'Practice · SM-2 flashcards' },
-  { src: '/screenshots/home.png', alt: 'Home dashboard with stats and recent words', caption: 'Home · progress at a glance' },
+  { src: '/screenshots/progress.png', alt: 'Progress dashboard with mastery and streak', caption: 'Progress · mastery & streak' },
+  { src: '/screenshots/home.png', alt: 'Home dashboard with stats and recent words', caption: 'Home · at a glance' },
 ];
 
 const features = [
