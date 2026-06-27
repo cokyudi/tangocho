@@ -13,6 +13,7 @@ export type SaveWordInput = {
   partOfSpeech: string;
   jlpt: string;
   exampleJp: string;
+  exampleFurigana: string | null;
   exampleTranslation: string;
   notes: string;
   sourceId: string | null;
@@ -61,6 +62,7 @@ export async function saveWord(input: SaveWordInput): Promise<SaveResult> {
     part_of_speech: clean(input.partOfSpeech),
     jlpt: clean(input.jlpt),
     example_jp: clean(input.exampleJp),
+    example_furigana: input.exampleFurigana,
     example_translation: clean(input.exampleTranslation),
     notes: clean(input.notes),
   });

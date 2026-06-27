@@ -90,6 +90,7 @@ export type Database = {
           created_at: string
           due_date: string | null
           ease_factor: number
+          example_furigana: string | null
           example_jp: string | null
           example_translation: string | null
           id: string
@@ -111,6 +112,7 @@ export type Database = {
           created_at?: string
           due_date?: string | null
           ease_factor?: number
+          example_furigana?: string | null
           example_jp?: string | null
           example_translation?: string | null
           id?: string
@@ -132,6 +134,7 @@ export type Database = {
           created_at?: string
           due_date?: string | null
           ease_factor?: number
+          example_furigana?: string | null
           example_jp?: string | null
           example_translation?: string | null
           id?: string

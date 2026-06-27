@@ -48,6 +48,11 @@ export default function EditWordModal({
     const res = await updateWord({
       id: word.id,
       ...fields,
+      // Keep the AI furigana only if the example text is unchanged; otherwise drop it.
+      exampleFurigana:
+        fields.exampleJp.trim() === (word.example_jp ?? '').trim()
+          ? (word.example_furigana ?? null)
+          : null,
       sourceId: source.sourceId,
       newSource: source.newSource,
     });

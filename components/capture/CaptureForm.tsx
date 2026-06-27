@@ -29,6 +29,8 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
   const [fields, setFields] = useState(empty);
   const [enriching, setEnriching] = useState(false);
   const [enrichedFrom, setEnrichedFrom] = useState<'jisho' | 'gemini' | null>(null);
+  // Furigana-annotated example (derived from enrichment, not directly edited).
+  const [exampleFurigana, setExampleFurigana] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedCount, setSavedCount] = useState(0);
@@ -70,6 +72,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
         exampleTranslation: data.exampleTranslation ?? '',
         notes: '',
       });
+      setExampleFurigana(data.exampleFurigana ?? null);
       setEnrichedFrom(data.source);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Enrichment failed');
@@ -98,6 +101,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
     const result = await saveWord({
       term,
       ...fields,
+      exampleFurigana,
       sourceId: source.sourceId,
       newSource: source.newSource,
     });
@@ -109,6 +113,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
     // Reset for the next word; keep the source so consecutive adds are fast.
     setTerm('');
     setFields(empty);
+    setExampleFurigana(null);
     setEnrichedFrom(null);
     lastEnriched.current = '';
     setSavedCount((n) => n + 1);
@@ -198,7 +203,14 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
           <input value={fields.partOfSpeech} onChange={(e) => set('partOfSpeech', e.target.value)} className={inputClass} />
         </Labeled>
         <Labeled label="Example (Japanese)" full>
-          <input value={fields.exampleJp} onChange={(e) => set('exampleJp', e.target.value)} className={`${inputClass} font-jp`} />
+          <input
+            value={fields.exampleJp}
+            onChange={(e) => {
+              set('exampleJp', e.target.value);
+              setExampleFurigana(null); // editing invalidates the AI furigana
+            }}
+            className={`${inputClass} font-jp`}
+          />
         </Labeled>
         <Labeled label="Example (Indonesian)" full>
           <input value={fields.exampleTranslation} onChange={(e) => set('exampleTranslation', e.target.value)} className={inputClass} />

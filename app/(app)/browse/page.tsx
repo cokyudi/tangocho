@@ -9,7 +9,7 @@ export default async function BrowsePage() {
     supabase
       .from('words')
       .select(
-        'id, term, reading, meaning_id, meaning_en, part_of_speech, jlpt, example_jp, example_translation, notes, repetitions, interval, due_date, source_id, created_at',
+        'id, term, reading, meaning_id, meaning_en, part_of_speech, jlpt, example_jp, example_furigana, example_translation, notes, repetitions, interval, due_date, source_id, created_at',
       )
       .order('created_at', { ascending: false }),
     supabase.from('sources').select('id, type, name, detail').order('name'),

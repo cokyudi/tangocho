@@ -7,6 +7,7 @@ export type BrowseWord = {
   part_of_speech: string | null;
   jlpt: string | null;
   example_jp: string | null;
+  example_furigana: string | null;
   example_translation: string | null;
   notes: string | null;
   repetitions: number;

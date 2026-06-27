@@ -6,6 +6,7 @@ import { X, Pencil, Trash2, Loader2 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Furigana from '@/components/Furigana';
+import FuriganaText from '@/components/FuriganaText';
 import { deleteWord } from '@/app/(app)/browse/actions';
 import { masteryLevel, isDue, MASTERY_LABELS } from '@/lib/mastery';
 import type { BrowseWord } from '@/components/browse/types';
@@ -84,7 +85,10 @@ export default function WordDetailSheet({
         {/* Example */}
         {word.example_jp && (
           <div className="mt-4 border-t-2 border-ink/15 pt-4">
-            <p className="font-jp text-lg leading-relaxed text-ink">{word.example_jp}</p>
+            <FuriganaText
+              text={word.example_furigana ?? word.example_jp}
+              className="text-lg leading-loose text-ink"
+            />
             {word.example_translation && (
               <p className="mt-1 text-sm text-muted">{word.example_translation}</p>
             )}

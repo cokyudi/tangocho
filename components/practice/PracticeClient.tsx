@@ -5,6 +5,7 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Furigana from '@/components/Furigana';
+import FuriganaText from '@/components/FuriganaText';
 import { reviewWord } from '@/app/(app)/practice/actions';
 import { reviewSrs, type Rating } from '@/lib/srs';
 
@@ -15,6 +16,7 @@ export type PracticeWord = {
   meaning_id: string | null;
   meaning_en: string | null;
   example_jp: string | null;
+  example_furigana: string | null;
   example_translation: string | null;
   jlpt: string | null;
   part_of_speech: string | null;
@@ -107,7 +109,10 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
             {word.meaning_en && <p className="text-muted">{word.meaning_en}</p>}
             {word.example_jp && (
               <div className="border-t-2 border-ink/15 pt-3">
-                <p className="font-jp text-lg text-ink">{word.example_jp}</p>
+                <FuriganaText
+                  text={word.example_furigana ?? word.example_jp}
+                  className="text-lg leading-loose text-ink"
+                />
                 {word.example_translation && (
                   <p className="text-sm text-muted">{word.example_translation}</p>
                 )}

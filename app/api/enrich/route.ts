@@ -45,6 +45,7 @@ export async function POST(request: Request) {
         partOfSpeech: jisho.partOfSpeech,
         jlpt: jisho.jlpt,
         exampleJp: object.exampleJp,
+        exampleFurigana: object.exampleFurigana,
         exampleTranslation: object.exampleTranslation,
         source: 'jisho',
       };
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       partOfSpeech: object.partOfSpeech,
       jlpt: object.jlpt,
       exampleJp: object.exampleJp,
+      exampleFurigana: object.exampleFurigana,
       exampleTranslation: object.exampleTranslation,
       source: 'gemini',
     };
@@ -84,6 +86,7 @@ export async function POST(request: Request) {
         partOfSpeech: jisho.partOfSpeech,
         jlpt: jisho.jlpt,
         exampleJp: null,
+        exampleFurigana: null,
         exampleTranslation: null,
         source: 'jisho',
       };
