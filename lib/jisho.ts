@@ -40,9 +40,12 @@ export async function lookupJisho(term: string): Promise<JishoEntry | null> {
     return null;
   }
 
+  // Require an exact match on the term (word or reading). Jisho's fuzzy search
+  // returns loose hits (e.g. 矢 for やらかした) that must NOT be trusted —
+  // those fall through to the Gemini-fills-everything path for slang/casual.
   const entry = json.data?.find((d) =>
     d.japanese?.some((j) => j.word === term || j.reading === term),
-  ) ?? json.data?.[0];
+  );
   if (!entry) return null;
 
   const jp = entry.japanese?.[0];
