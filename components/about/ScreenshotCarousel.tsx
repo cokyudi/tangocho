@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PhoneFrame from '@/components/about/PhoneFrame';
 
@@ -11,15 +11,16 @@ export default function ScreenshotCarousel({ shots }: { shots: Shot[] }) {
   const n = shots.length;
   const [[index, dir], setState] = useState<[number, number]>([0, 0]);
   const [paused, setPaused] = useState(false);
+  const reduce = useReducedMotion();
 
   const go = useCallback((d: number) => setState(([i]) => [(i + d + n) % n, d]), [n]);
   const to = (i: number) => setState(([cur]) => [i, i > cur ? 1 : -1]);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || reduce) return;
     const id = setInterval(() => go(1), 3800);
     return () => clearInterval(id);
-  }, [paused, go]);
+  }, [paused, reduce, go]);
 
   const shot = shots[index];
 

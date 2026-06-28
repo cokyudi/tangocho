@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import PhoneFrame from '@/components/about/PhoneFrame';
 
 const screens = [
@@ -12,11 +12,13 @@ const screens = [
 
 export default function HeroMockup() {
   const [i, setI] = useState(0);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
+    if (reduce) return;
     const id = setInterval(() => setI((p) => (p + 1) % screens.length), 2600);
     return () => clearInterval(id);
-  }, []);
+  }, [reduce]);
 
   return (
     <div className="mx-auto w-full max-w-[230px]">
