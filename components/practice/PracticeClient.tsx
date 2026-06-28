@@ -40,15 +40,18 @@ function intervalLabel(days: number) {
   return `${Math.round(days / 365)}y`;
 }
 
+type QueueWord = PracticeWord & { relearn?: boolean };
+
 export default function PracticeClient({ words }: { words: PracticeWord[] }) {
-  const [index, setIndex] = useState(0);
+  const [queue, setQueue] = useState<QueueWord[]>(words);
+  const [pos, setPos] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [showFurigana, setShowFurigana] = useState(false);
   const [pending, setPending] = useState<Rating | null>(null);
   const [reviewed, setReviewed] = useState(0);
 
-  const total = words.length;
-  const word = words[index];
+  const total = queue.length;
+  const word = queue[pos];
 
   async function rate(rating: Rating) {
     if (!word || pending) return;
@@ -56,13 +59,30 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
     await reviewWord(word.id, rating);
     setPending(null);
     setReviewed((n) => n + 1);
-    if (index + 1 >= total) {
-      setIndex(total); // move past the end → done screen
-    } else {
-      setIndex((i) => i + 1);
-      setFlipped(false);
-      setShowFurigana(false);
+
+    // Same-session relearning: a forgotten card comes back at the end of the
+    // deck. reviewWord already persisted interval=1/reps=0, so reflect that in
+    // the requeued copy for an honest interval preview.
+    if (rating === 'forgot') {
+      const next = reviewSrs(
+        { ease_factor: word.ease_factor, interval: word.interval, repetitions: word.repetitions },
+        'forgot',
+      );
+      setQueue((q) => [
+        ...q,
+        {
+          ...word,
+          relearn: true,
+          ease_factor: next.ease_factor,
+          interval: next.interval,
+          repetitions: next.repetitions,
+        },
+      ]);
     }
+
+    setPos((p) => p + 1);
+    setFlipped(false);
+    setShowFurigana(false);
   }
 
   if (total === 0) {
@@ -71,11 +91,11 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
     );
   }
 
-  if (index >= total) {
+  if (pos >= total) {
     return (
       <Done
         title="All done 🎉"
-        subtitle={`Reviewed ${reviewed} ${reviewed === 1 ? 'word' : 'words'}. Nice work.`}
+        subtitle={`Reviewed ${reviewed} ${reviewed === 1 ? 'card' : 'cards'}. Nice work.`}
       />
     );
   }
@@ -84,9 +104,12 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
     <div className="flex min-h-[70vh] flex-col">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-ink">Practice</h1>
-        <Badge variant="neutral">
-          {index + 1} / {total}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {word.relearn && <Badge variant="highlight">Relearning</Badge>}
+          <Badge variant="neutral">
+            {pos + 1} / {total}
+          </Badge>
+        </div>
       </div>
 
       {/* Card */}

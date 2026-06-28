@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Download } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/server';
@@ -118,6 +119,23 @@ export default async function ProgressPage() {
       <p className="text-center">
         <Badge variant="neutral">Keep the streak alive 🔥</Badge>
       </p>
+
+      <section className="space-y-3 border-t-2 border-ink/15 pt-6">
+        <h2 className="font-display text-lg font-bold text-ink">Backup</h2>
+        <Card className="flex items-center justify-between gap-3 p-4">
+          <p className="text-sm text-muted">
+            Download all words, sources & review history as JSON.
+          </p>
+          <a
+            href="/api/export"
+            download
+            className="inline-flex shrink-0 items-center gap-1.5 border-2 border-ink bg-surface px-3 py-2 font-display text-sm font-bold text-ink shadow-retro-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </a>
+        </Card>
+      </section>
     </div>
   );
 }
