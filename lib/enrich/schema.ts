@@ -7,7 +7,14 @@ const exampleFuriganaDescription =
 
 // Fields Gemini fills when Jisho already supplied reading/EN/POS/JLPT.
 export const geminiGapSchema = z.object({
-  meaningId: z.string().describe('Concise Indonesian meaning of the word'),
+  meaningId: z.string().describe('Concise Indonesian meaning of the word, reflecting common colloquial/slang usage if any'),
+  meaningEnRefined: z
+    .string()
+    .nullable()
+    .describe(
+      'If the word has a common colloquial or slang sense NOT captured by the dictionary English meaning, ' +
+        'return a refined concise English meaning that reflects the everyday usage; otherwise null.',
+    ),
   exampleJp: z.string().describe('One short, natural Japanese sentence using the word'),
   exampleFurigana: z.string().describe(exampleFuriganaDescription),
   exampleTranslation: z.string().describe('Indonesian translation of the example sentence'),
@@ -39,4 +46,5 @@ export type EnrichResult = {
   exampleFurigana: string | null;
   exampleTranslation: string | null;
   source: 'jisho' | 'gemini';
+  geminiUsed: boolean;
 };

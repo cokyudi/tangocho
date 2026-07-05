@@ -28,7 +28,7 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
   const [term, setTerm] = useState('');
   const [fields, setFields] = useState(empty);
   const [enriching, setEnriching] = useState(false);
-  const [enrichedFrom, setEnrichedFrom] = useState<'jisho' | 'gemini' | null>(null);
+  const [enrichedFrom, setEnrichedFrom] = useState<{ source: 'jisho' | 'gemini'; geminiUsed: boolean } | null>(null);
   // Furigana-annotated example (derived from enrichment, not directly edited).
   const [exampleFurigana, setExampleFurigana] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -60,7 +60,11 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ term: t }),
       });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? 'Enrich failed');
+      if (!res.ok)
+        throw new Error(
+          (await res.json().catch(() => ({})))?.error ??
+            'AI lookup failed — try again or fill the fields manually.',
+        );
       const data = (await res.json()) as EnrichResult;
       setFields({
         reading: data.reading ?? '',
@@ -73,9 +77,9 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
         notes: '',
       });
       setExampleFurigana(data.exampleFurigana ?? null);
-      setEnrichedFrom(data.source);
+      setEnrichedFrom({ source: data.source, geminiUsed: data.geminiUsed });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Enrichment failed');
+      setError(e instanceof Error ? e.message : 'AI lookup failed — try again or fill the fields manually.');
       setEnrichedFrom(null);
     } finally {
       setEnriching(false);
@@ -178,7 +182,11 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
           <p className="text-xs text-muted">
             Auto-filled from{' '}
             <span className="font-display font-bold text-accent">
-              {enrichedFrom === 'jisho' ? 'Jisho' : 'Gemini'}
+              {enrichedFrom.source === 'gemini'
+                ? 'Gemini'
+                : enrichedFrom.geminiUsed
+                  ? 'Jisho + Gemini'
+                  : 'Jisho'}
             </span>
             . Edit anything below.
           </p>

@@ -34,13 +34,16 @@ export async function POST(request: Request) {
         schema: geminiGapSchema,
         prompt:
           `The Japanese word is "${trimmed}" (reading: ${jisho.reading ?? '?'}). ` +
-          `Its English meaning is: ${jisho.meaningEn ?? 'unknown'}. ` +
-          `Give a concise Indonesian meaning and one short, natural example sentence in Japanese using the word, with its Indonesian translation.`,
+          `Its dictionary English meaning is: ${jisho.meaningEn ?? 'unknown'}. ` +
+          `Give a concise Indonesian meaning and one short, natural example sentence in Japanese using the word, with its Indonesian translation. ` +
+          `If this word is commonly used as slang or colloquially with a sense the dictionary meaning misses ` +
+          `(e.g. ワンチャン usually means "maybe/there's a chance" adverbially, not literally "one chance"), ` +
+          `make the Indonesian meaning reflect that everyday usage and provide a refined English meaning.`,
       });
       const result: EnrichResult = {
         term: trimmed,
         reading: jisho.reading,
-        meaningEn: jisho.meaningEn,
+        meaningEn: object.meaningEnRefined ?? jisho.meaningEn,
         meaningId: object.meaningId,
         partOfSpeech: jisho.partOfSpeech,
         jlpt: jisho.jlpt,
@@ -48,6 +51,7 @@ export async function POST(request: Request) {
         exampleFurigana: object.exampleFurigana,
         exampleTranslation: object.exampleTranslation,
         source: 'jisho',
+        geminiUsed: true,
       };
       return NextResponse.json(result);
     }
@@ -73,6 +77,7 @@ export async function POST(request: Request) {
       exampleFurigana: object.exampleFurigana,
       exampleTranslation: object.exampleTranslation,
       source: 'gemini',
+      geminiUsed: true,
     };
     return NextResponse.json(result);
   } catch {
@@ -89,9 +94,13 @@ export async function POST(request: Request) {
         exampleFurigana: null,
         exampleTranslation: null,
         source: 'jisho',
+        geminiUsed: false,
       };
       return NextResponse.json(result);
     }
-    return NextResponse.json({ error: 'Enrichment failed' }, { status: 502 });
+    return NextResponse.json(
+      { error: 'AI lookup failed — try again or fill the fields manually.' },
+      { status: 502 },
+    );
   }
 }
