@@ -36,9 +36,10 @@ export async function POST(request: Request) {
           `The Japanese word is "${trimmed}" (reading: ${jisho.reading ?? '?'}). ` +
           `Its dictionary English meaning is: ${jisho.meaningEn ?? 'unknown'}. ` +
           `Give a concise Indonesian meaning and one short, natural example sentence in Japanese using the word, with its Indonesian translation. ` +
-          `If this word is commonly used as slang or colloquially with a sense the dictionary meaning misses ` +
-          `(e.g. ワンチャン usually means "maybe/there's a chance" adverbially, not literally "one chance"), ` +
-          `make the Indonesian meaning reflect that everyday usage and provide a refined English meaning.`,
+          `Most words are ordinary vocabulary — for those, base the Indonesian meaning on the dictionary meaning and leave meaningEnRefined null. ` +
+          `Only when this word has a well-known slang/colloquial sense that genuinely DIFFERS from the dictionary meaning ` +
+          `(e.g. ワンチャン usually means "maybe/there's a chance" adverbially, not literally "one chance") ` +
+          `should you reflect that everyday usage in the Indonesian meaning and set a refined English meaning. Do not merely reword the dictionary meaning.`,
       });
       const result: EnrichResult = {
         term: trimmed,

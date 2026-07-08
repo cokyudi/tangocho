@@ -12,8 +12,10 @@ export const geminiGapSchema = z.object({
     .string()
     .nullable()
     .describe(
-      'If the word has a common colloquial or slang sense NOT captured by the dictionary English meaning, ' +
-        'return a refined concise English meaning that reflects the everyday usage; otherwise null.',
+      'Almost always null. Only set this when the word has a WELL-KNOWN slang/colloquial sense that is a ' +
+        'genuinely DIFFERENT meaning from the dictionary one (a distinct sense, e.g. ワンチャン "one chance" → ' +
+        '"maybe/possibly"). Never paraphrase, reword, shorten, re-punctuate, or "improve" the dictionary meaning — ' +
+        'if the everyday meaning is the same sense as the dictionary meaning, return null. When unsure, return null.',
     ),
   exampleJp: z.string().describe('One short, natural Japanese sentence using the word'),
   exampleFurigana: z.string().describe(exampleFuriganaDescription),
