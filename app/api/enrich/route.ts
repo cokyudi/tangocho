@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isAllowedEmail } from '@/lib/auth';
 import { lookupJisho } from '@/lib/jisho';
 import { geminiGapSchema, geminiFullSchema, type EnrichResult } from '@/lib/enrich/schema';
+import { isRateLimit } from '@/lib/enrich/rate-limit';
 
 const MODEL = 'gemini-2.5-flash';
 
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
       geminiUsed: true,
     };
     return NextResponse.json(result);
-  } catch {
+  } catch (err) {
     // Gemini failed — still return whatever Jisho gave so the user can save.
     if (jisho) {
       const result: EnrichResult = {
@@ -98,6 +99,12 @@ export async function POST(request: Request) {
         geminiUsed: false,
       };
       return NextResponse.json(result);
+    }
+    if (isRateLimit(err)) {
+      return NextResponse.json(
+        { error: 'AI is rate-limited — wait a minute and try again, or fill the fields manually.' },
+        { status: 429 },
+      );
     }
     return NextResponse.json(
       { error: 'AI lookup failed — try again or fill the fields manually.' },
