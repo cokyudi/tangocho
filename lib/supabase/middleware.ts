@@ -53,9 +53,12 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (!user) {
-    // Guests landing on the root see the public showcase; everything else
-    // routes to sign-in.
-    return NextResponse.redirect(new URL(pathname === '/' ? '/about' : '/login', request.url));
+    // Guests get the public showcase served in place at `/` (200, indexable);
+    // everything else routes to sign-in.
+    if (pathname === '/') {
+      return NextResponse.rewrite(new URL('/about', request.url));
+    }
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   if (!isAllowedEmail(user.email)) {

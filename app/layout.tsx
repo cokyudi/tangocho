@@ -19,6 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://tangocho.yudidputra.com'),
   applicationName: 'tangocho',
   title: {
     default: 'tangocho 単語帳',
