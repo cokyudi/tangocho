@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import Furigana from '@/components/Furigana';
-import FuriganaText from '@/components/FuriganaText';
-import { reviewWord } from '@/app/(app)/practice/actions';
-import { reviewSrs, type Rating } from '@/lib/srs';
+import Flashcard from '@/components/practice/Flashcard';
+import RatingButtons from '@/components/practice/RatingButtons';
+import PracticeDone from '@/components/practice/PracticeDone';
+import { usePracticeSession } from '@/components/practice/usePracticeSession';
 
 export type PracticeWord = {
   id: string;
@@ -27,75 +26,20 @@ export type PracticeWord = {
   source: { name: string; detail: string | null; type: string } | null;
 };
 
-const RATINGS: { rating: Rating; label: string; variant: 'accent' | 'neutral' }[] = [
-  { rating: 'forgot', label: 'Forgot', variant: 'neutral' },
-  { rating: 'hard', label: 'Hard', variant: 'neutral' },
-  { rating: 'easy', label: 'Easy', variant: 'accent' },
-];
-
-function intervalLabel(days: number) {
-  if (days < 1) return '<1d';
-  if (days < 30) return `${days}d`;
-  if (days < 365) return `${Math.round(days / 30)}mo`;
-  return `${Math.round(days / 365)}y`;
-}
-
-type QueueWord = PracticeWord & { relearn?: boolean };
-
 export default function PracticeClient({ words }: { words: PracticeWord[] }) {
-  const [queue, setQueue] = useState<QueueWord[]>(words);
-  const [pos, setPos] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [showFurigana, setShowFurigana] = useState(false);
-  const [pending, setPending] = useState<Rating | null>(null);
-  const [reviewed, setReviewed] = useState(0);
+  const s = usePracticeSession(words);
 
-  const total = queue.length;
-  const word = queue[pos];
-
-  async function rate(rating: Rating) {
-    if (!word || pending) return;
-    setPending(rating);
-    await reviewWord(word.id, rating);
-    setPending(null);
-    setReviewed((n) => n + 1);
-
-    // Same-session relearning: a forgotten card comes back at the end of the
-    // deck. reviewWord already persisted interval=1/reps=0, so reflect that in
-    // the requeued copy for an honest interval preview.
-    if (rating === 'forgot') {
-      const next = reviewSrs(
-        { ease_factor: word.ease_factor, interval: word.interval, repetitions: word.repetitions },
-        'forgot',
-      );
-      setQueue((q) => [
-        ...q,
-        {
-          ...word,
-          relearn: true,
-          ease_factor: next.ease_factor,
-          interval: next.interval,
-          repetitions: next.repetitions,
-        },
-      ]);
-    }
-
-    setPos((p) => p + 1);
-    setFlipped(false);
-    setShowFurigana(false);
-  }
-
-  if (total === 0) {
+  if (s.total === 0) {
     return (
-      <Done title="Nothing due 🎉" subtitle="You're all caught up. Come back later or add new words." />
+      <PracticeDone title="Nothing due 🎉" subtitle="You're all caught up. Come back later or add new words." />
     );
   }
 
-  if (pos >= total) {
+  if (s.pos >= s.total) {
     return (
-      <Done
+      <PracticeDone
         title="All done 🎉"
-        subtitle={`Reviewed ${reviewed} ${reviewed === 1 ? 'card' : 'cards'}. Nice work.`}
+        subtitle={`Reviewed ${s.reviewed} ${s.reviewed === 1 ? 'card' : 'cards'}. Nice work.`}
       />
     );
   }
@@ -105,119 +49,32 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="font-display text-2xl font-bold text-ink">Practice</h1>
         <div className="flex items-center gap-2">
-          {word.relearn && <Badge variant="highlight">Relearning</Badge>}
+          {s.word.relearn && <Badge variant="highlight">Relearning</Badge>}
           <Badge variant="neutral">
-            {pos + 1} / {total}
+            {s.pos + 1} / {s.total}
           </Badge>
         </div>
       </div>
 
-      {/* Card */}
-      <button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        className="flex flex-1 flex-col items-center justify-center gap-5 border-2 border-ink bg-surface p-6 text-center shadow-retro-lg"
-      >
-        <Furigana
-          term={word.term}
-          reading={showFurigana ? word.reading : null}
-          className="text-5xl text-ink"
-        />
+      <Flashcard word={s.word} flipped={s.flipped} showFurigana={s.showFurigana} onFlip={s.flip} />
 
-        {!flipped ? (
-          <span className="text-sm text-muted">Tap to flip</span>
-        ) : (
-          <div className="space-y-3">
-            {word.meaning_id && <p className="text-2xl font-bold text-ink">{word.meaning_id}</p>}
-            {word.meaning_en && <p className="text-muted">{word.meaning_en}</p>}
-            {word.example_jp && (
-              <div className="border-t-2 border-ink/15 pt-3">
-                <FuriganaText
-                  text={word.example_furigana ?? word.example_jp}
-                  className="text-lg leading-loose text-ink"
-                />
-                {word.example_translation && (
-                  <p className="text-sm text-muted">{word.example_translation}</p>
-                )}
-              </div>
-            )}
-            <div className="flex flex-wrap justify-center gap-1.5 pt-1">
-              {word.jlpt && <Badge variant="neutral">{word.jlpt}</Badge>}
-              {word.source && (
-                <Badge variant="neutral">
-                  {word.source.name}
-                  {word.source.detail ? ` · ${word.source.detail}` : ''}
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-      </button>
-
-      {/* Controls */}
       <div className="mt-4 space-y-3">
         <button
           type="button"
-          onClick={() => setShowFurigana((s) => !s)}
+          onClick={s.toggleFurigana}
           className="mx-auto flex items-center gap-1.5 text-sm font-display font-bold text-muted hover:text-accent"
         >
-          {showFurigana ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {showFurigana ? 'Hide reading' : 'Show reading'}
+          {s.showFurigana ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {s.showFurigana ? 'Hide reading' : 'Show reading'}
         </button>
 
-        {flipped ? (
-          <div className="grid grid-cols-3 gap-2">
-            {RATINGS.map(({ rating, label, variant }) => {
-              const preview = reviewSrs(
-                {
-                  ease_factor: word.ease_factor,
-                  interval: word.interval,
-                  repetitions: word.repetitions,
-                },
-                rating,
-              );
-              return (
-                <Button
-                  key={rating}
-                  variant={variant}
-                  onClick={() => rate(rating)}
-                  disabled={pending !== null}
-                  className="flex-col !px-2 !py-3"
-                >
-                  {pending === rating ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <span>{label}</span>
-                      <span className="text-xs font-normal opacity-80">
-                        {intervalLabel(preview.interval)}
-                      </span>
-                    </>
-                  )}
-                </Button>
-              );
-            })}
-          </div>
+        {s.flipped ? (
+          <RatingButtons word={s.word} pending={s.pending} onRate={s.rate} />
         ) : (
-          <Button onClick={() => setFlipped(true)} className="w-full">
+          <Button onClick={s.showAnswer} className="w-full">
             Show answer
           </Button>
         )}
-      </div>
-    </div>
-  );
-}
-
-function Done({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
-      <h1 className="font-display text-3xl font-bold text-ink">{title}</h1>
-      <p className="max-w-sm text-muted">{subtitle}</p>
-      <div className="flex gap-3">
-        <Button href="/capture">+ Add a word</Button>
-        <Button href="/browse" variant="neutral">
-          Browse
-        </Button>
       </div>
     </div>
   );
