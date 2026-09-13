@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { inputClass } from '@/components/ui/Field';
 import { SOURCE_TYPES, SOURCE_TYPE_LABELS, type SourceType } from '@/constants/sources';
 
 export type Source = { id: string; type: string; name: string; detail: string | null };
@@ -8,9 +9,6 @@ export type SourceSelection = {
   sourceId: string | null;
   newSource: { type: SourceType; name: string; detail: string } | null;
 };
-
-const inputClass =
-  'w-full border-2 border-ink bg-surface px-3 py-2 text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent';
 
 export default function SourceField({
   sources,

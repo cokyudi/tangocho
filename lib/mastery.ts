@@ -25,3 +25,6 @@ export function isDue(word: { due_date: string | null }, today = new Date()): bo
   const d = new Date(`${word.due_date}T23:59:59`);
   return d <= today;
 }
+
+export const masteryVariant = (l: MasteryLevel): 'accent' | 'highlight' | 'neutral' =>
+  l === 'mastered' ? 'accent' : l === 'new' ? 'highlight' : 'neutral';

@@ -1,15 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { X, Pencil, Trash2, Loader2 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Furigana from '@/components/Furigana';
 import FuriganaText from '@/components/FuriganaText';
-import { deleteWord } from '@/app/(app)/browse/actions';
-import { masteryLevel, isDue, MASTERY_LABELS } from '@/lib/mastery';
+import { masteryLevel, masteryVariant, isDue, MASTERY_LABELS } from '@/lib/mastery';
 import type { BrowseWord } from '@/components/browse/types';
+import { useDeleteWord } from '@/components/browse/useDeleteWord';
 
 export default function WordDetailSheet({
   word,
@@ -22,24 +20,10 @@ export default function WordDetailSheet({
   onClose: () => void;
   onEdit: () => void;
 }) {
-  const router = useRouter();
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+  const { deleting, error, onDelete } = useDeleteWord(word, onClose);
   const level = masteryLevel(word);
   const due = isDue(word);
   const meta = [word.reading, word.part_of_speech, word.jlpt].filter(Boolean).join(' · ');
-
-  async function onDelete() {
-    if (!confirm(`Delete “${word.term}”? This can’t be undone.`)) return;
-    setDeleting(true);
-    setError(null);
-    const res = await deleteWord(word.id);
-    setDeleting(false);
-    if (!res.ok) return setError(res.error);
-    router.refresh();
-    onClose();
-  }
 
   return (
     <div
@@ -102,7 +86,7 @@ export default function WordDetailSheet({
 
         {/* Meta badges */}
         <div className="mt-4 flex flex-wrap gap-1.5 border-t-2 border-ink/15 pt-4">
-          <Badge variant={level === 'mastered' ? 'accent' : level === 'new' ? 'highlight' : 'neutral'}>
+          <Badge variant={masteryVariant(level)}>
             {MASTERY_LABELS[level]}
           </Badge>
           <Badge variant={due ? 'highlight' : 'neutral'}>
