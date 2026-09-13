@@ -1,128 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Sparkles, Loader2, Check } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
-import { saveWord } from '@/app/(app)/capture/actions';
-import type { EnrichResult } from '@/lib/enrich/schema';
-import SourceField, { type Source, type SourceSelection } from '@/components/SourceField';
-import { useDebounce } from '@/lib/hooks/useDebounce';
-
-const inputClass =
-  'w-full border-2 border-ink bg-surface px-3 py-2 text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-accent';
-
-const empty = {
-  reading: '',
-  meaningId: '',
-  meaningEn: '',
-  partOfSpeech: '',
-  jlpt: '',
-  exampleJp: '',
-  exampleTranslation: '',
-  notes: '',
-};
+import SourceField, { type Source } from '@/components/SourceField';
+import WordFields from '@/components/WordFields';
+import TermInput from '@/components/capture/TermInput';
+import { useCaptureForm } from '@/components/capture/useCaptureForm';
 
 export default function CaptureForm({ sources }: { sources: Source[] }) {
-  const [term, setTerm] = useState('');
-  const [fields, setFields] = useState(empty);
-  const [enriching, setEnriching] = useState(false);
-  const [enrichedFrom, setEnrichedFrom] = useState<{ source: 'jisho' | 'gemini'; geminiUsed: boolean } | null>(null);
-  // Furigana-annotated example (derived from enrichment, not directly edited).
-  const [exampleFurigana, setExampleFurigana] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [savedCount, setSavedCount] = useState(0);
-
-  // Source selection (kept across saves for fast consecutive adds)
-  const [source, setSource] = useState<SourceSelection>({ sourceId: null, newSource: null });
-
-  const termRef = useRef<HTMLInputElement>(null);
-  const composingRef = useRef(false); // true while an IME composition is in progress
-  const lastEnriched = useRef<string>('');
-
-  useEffect(() => {
-    termRef.current?.focus();
-  }, []);
-
-  const set = (k: keyof typeof empty, v: string) => setFields((f) => ({ ...f, [k]: v }));
-
-  const enrich = useCallback(async (value: string) => {
-    const t = value.trim();
-    if (!t || t === lastEnriched.current) return;
-    lastEnriched.current = t;
-    setEnriching(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ term: t }),
-      });
-      if (!res.ok)
-        throw new Error(
-          (await res.json().catch(() => ({})))?.error ??
-            'AI lookup failed — try again or fill the fields manually.',
-        );
-      const data = (await res.json()) as EnrichResult;
-      setFields({
-        reading: data.reading ?? '',
-        meaningId: data.meaningId ?? '',
-        meaningEn: data.meaningEn ?? '',
-        partOfSpeech: data.partOfSpeech ?? '',
-        jlpt: data.jlpt ?? '',
-        exampleJp: data.exampleJp ?? '',
-        exampleTranslation: data.exampleTranslation ?? '',
-        notes: '',
-      });
-      setExampleFurigana(data.exampleFurigana ?? null);
-      setEnrichedFrom({ source: data.source, geminiUsed: data.geminiUsed });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'AI lookup failed — try again or fill the fields manually.');
-      setEnrichedFrom(null);
-    } finally {
-      setEnriching(false);
-    }
-  }, []);
-
-  // Auto-enrich only once typing has settled (and not mid-IME-composition),
-  // so we don't spend Gemini/Jisho calls on every keystroke.
-  const debouncedTerm = useDebounce(term, 800);
-  useEffect(() => {
-    if (composingRef.current) return;
-    enrich(debouncedTerm);
-  }, [debouncedTerm, enrich]);
-
-  async function onSave() {
-    if (!term.trim()) {
-      setError('Type a word first');
-      termRef.current?.focus();
-      return;
-    }
-    setSaving(true);
-    setError(null);
-    const result = await saveWord({
-      term,
-      ...fields,
-      exampleFurigana,
-      sourceId: source.sourceId,
-      newSource: source.newSource,
-    });
-    setSaving(false);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    // Reset for the next word; keep the source so consecutive adds are fast.
-    setTerm('');
-    setFields(empty);
-    setExampleFurigana(null);
-    setEnrichedFrom(null);
-    lastEnriched.current = '';
-    setSavedCount((n) => n + 1);
-    termRef.current?.focus();
-  }
+  const { termInput, fields, setField, source, setSource, saving, error, savedCount, onSave } =
+    useCaptureForm();
 
   return (
     <div className="space-y-5">
@@ -135,100 +24,17 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
         )}
       </div>
 
-      {/* Term + AI fill */}
-      <Card className="space-y-3 p-4">
-        <label className="block text-xs font-display font-bold uppercase tracking-wide text-muted">
-          Japanese word
-        </label>
-        <div className="flex gap-2">
-          <input
-            ref={termRef}
-            value={term}
-            onChange={(e) => {
-              setTerm(e.target.value);
-              setEnrichedFrom(null);
-            }}
-            onCompositionStart={() => {
-              composingRef.current = true;
-            }}
-            onCompositionEnd={(e) => {
-              composingRef.current = false;
-              setTerm(e.currentTarget.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !composingRef.current) {
-                e.preventDefault();
-                enrich(term);
-              }
-            }}
-            placeholder="例: 食べる, ぴえん…"
-            className={`${inputClass} font-jp text-2xl`}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-          />
-          <Button
-            type="button"
-            variant="neutral"
-            onClick={() => enrich(term)}
-            disabled={enriching || !term.trim()}
-            className="shrink-0"
-            aria-label="Fill with AI"
-          >
-            {enriching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-          </Button>
-        </div>
-        {enrichedFrom && (
-          <p className="text-xs text-muted">
-            Auto-filled from{' '}
-            <span className="font-display font-bold text-accent">
-              {enrichedFrom.source === 'gemini'
-                ? 'Gemini'
-                : enrichedFrom.geminiUsed
-                  ? 'Jisho + Gemini'
-                  : 'Jisho'}
-            </span>
-            . Edit anything below.
-          </p>
-        )}
-      </Card>
+      <TermInput {...termInput} />
 
-      {/* Editable fields */}
       <Card className="grid grid-cols-2 gap-3 p-4">
-        <Labeled label="Reading (furigana)">
-          <input value={fields.reading} onChange={(e) => set('reading', e.target.value)} className={`${inputClass} font-jp`} />
-        </Labeled>
-        <Labeled label="JLPT">
-          <input value={fields.jlpt} onChange={(e) => set('jlpt', e.target.value)} className={inputClass} placeholder="N5…N1" />
-        </Labeled>
-        <Labeled label="Meaning (Indonesian)" full>
-          <input value={fields.meaningId} onChange={(e) => set('meaningId', e.target.value)} className={inputClass} />
-        </Labeled>
-        <Labeled label="Meaning (English)" full>
-          <input value={fields.meaningEn} onChange={(e) => set('meaningEn', e.target.value)} className={inputClass} />
-        </Labeled>
-        <Labeled label="Part of speech" full>
-          <input value={fields.partOfSpeech} onChange={(e) => set('partOfSpeech', e.target.value)} className={inputClass} />
-        </Labeled>
-        <Labeled label="Example (Japanese)" full>
-          <input
-            value={fields.exampleJp}
-            onChange={(e) => {
-              set('exampleJp', e.target.value);
-              setExampleFurigana(null); // editing invalidates the AI furigana
-            }}
-            className={`${inputClass} font-jp`}
-          />
-        </Labeled>
-        <Labeled label="Example (Indonesian)" full>
-          <input value={fields.exampleTranslation} onChange={(e) => set('exampleTranslation', e.target.value)} className={inputClass} />
-        </Labeled>
-        <Labeled label="Notes" full>
-          <input value={fields.notes} onChange={(e) => set('notes', e.target.value)} className={inputClass} />
-        </Labeled>
+        <WordFields
+          fields={fields}
+          onChange={setField}
+          readingLabel="Reading (furigana)"
+          jlptPlaceholder="N5…N1"
+        />
       </Card>
 
-      {/* Source */}
       <Card className="p-4">
         <SourceField sources={sources} value={source} onChange={setSource} />
       </Card>
@@ -238,23 +44,6 @@ export default function CaptureForm({ sources }: { sources: Source[] }) {
       <Button onClick={onSave} disabled={saving} className="w-full">
         {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Save word'}
       </Button>
-    </div>
-  );
-}
-
-function Labeled({
-  label,
-  full,
-  children,
-}: {
-  label: string;
-  full?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={`space-y-1 ${full ? 'col-span-2' : ''}`}>
-      <label className="block text-xs text-muted">{label}</label>
-      {children}
     </div>
   );
 }
