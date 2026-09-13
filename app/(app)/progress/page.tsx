@@ -3,12 +3,10 @@ import { Download } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/server';
-import { masteryLevel, MASTERY_LABELS, MASTERY_LEVELS, type MasteryLevel } from '@/lib/mastery';
+import { MASTERY_LABELS, MASTERY_LEVELS } from '@/lib/mastery';
+import { computeProgress } from '@/lib/progress';
 
 export const metadata = { title: 'Progress' };
-
-const tokyoDay = (d: Date | string) =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo' }).format(new Date(d));
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -20,35 +18,7 @@ export default async function ProgressPage() {
   const allWords = words ?? [];
   const allLogs = logs ?? [];
 
-  // Mastery distribution
-  const dist: Record<MasteryLevel, number> = { new: 0, learning: 0, young: 0, mature: 0, mastered: 0 };
-  for (const w of allWords) dist[masteryLevel(w)]++;
-  const maxDist = Math.max(1, ...MASTERY_LEVELS.map((l) => dist[l]));
-
-  // Reviews per day, last 14 days (Tokyo)
-  const counts = new Map<string, number>();
-  for (const l of allLogs) {
-    const d = tokyoDay(l.reviewed_at);
-    counts.set(d, (counts.get(d) ?? 0) + 1);
-  }
-  const days: { day: string; count: number; label: string }[] = [];
-  const now = new Date();
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const key = tokyoDay(d);
-    days.push({ day: key, count: counts.get(key) ?? 0, label: key.slice(5) });
-  }
-  const maxDay = Math.max(1, ...days.map((d) => d.count));
-
-  // Current streak (consecutive days with >=1 review, tolerant of no review yet today)
-  let streak = 0;
-  const cursor = new Date(now);
-  if (!counts.has(tokyoDay(cursor))) cursor.setDate(cursor.getDate() - 1);
-  while (counts.has(tokyoDay(cursor))) {
-    streak++;
-    cursor.setDate(cursor.getDate() - 1);
-  }
+  const { dist, maxDist, days, maxDay, streak } = computeProgress(allWords, allLogs);
 
   const stats = [
     { label: 'Words', value: allWords.length },
