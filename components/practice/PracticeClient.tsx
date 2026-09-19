@@ -40,14 +40,14 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
 
   if (s.total === 0) {
     return (
-      <PracticeDone title="Nothing due 🎉" subtitle="You're all caught up. Come back later or add new words." />
+      <PracticeDone title="Nothing due" subtitle="You're all caught up. Come back later or add new words." />
     );
   }
 
   if (s.pos >= s.total) {
     return (
       <PracticeDone
-        title="All done 🎉"
+        title="All done"
         subtitle={`Reviewed ${s.reviewed} ${s.reviewed === 1 ? 'card' : 'cards'}. Nice work.`}
       />
     );

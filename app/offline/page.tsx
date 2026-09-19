@@ -1,3 +1,4 @@
+import { WifiOff } from 'lucide-react';
 import Card from '@/components/ui/Card';
 
 export const metadata = { title: 'Offline' };
@@ -5,8 +6,9 @@ export const metadata = { title: 'Offline' };
 export default function OfflinePage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-6 px-4 text-center">
-      <h1 className="font-display text-3xl font-bold text-ink">
-        You&apos;re offline <span className="text-accent">📡</span>
+      <h1 className="inline-flex items-center gap-3 font-display text-3xl font-bold text-ink">
+        You&apos;re offline
+        <WifiOff aria-hidden className="h-7 w-7 shrink-0 text-accent" strokeWidth={2.5} />
       </h1>
       <Card className="w-full p-6 text-muted">
         <p>tangocho needs a connection to load your words. Reconnect and try again.</p>

@@ -28,7 +28,7 @@ export default async function Home() {
     <div className="space-y-8">
       <section className="space-y-2">
         <h1 className="font-display text-3xl font-bold text-ink">
-          おかえり <span className="text-accent">👋</span>
+          おかえり
         </h1>
         <p className="text-muted">Capture a word the moment you hear it.</p>
       </section>

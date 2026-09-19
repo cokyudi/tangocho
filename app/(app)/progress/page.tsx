@@ -87,7 +87,7 @@ export default async function ProgressPage() {
       </section>
 
       <p className="text-center">
-        <Badge variant="neutral">Keep the streak alive 🔥</Badge>
+        <Badge variant="neutral">Keep the streak alive</Badge>
       </p>
 
       <section className="space-y-3 border-t-2 border-ink/15 pt-6">

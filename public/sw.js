@@ -1,6 +1,6 @@
 // Minimal service worker: cache-first for static assets, network-first for
 // navigations with an offline fallback. Enough for an installable PWA shell.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = `tangocho-static-${VERSION}`;
 const OFFLINE_URL = '/offline';
 
