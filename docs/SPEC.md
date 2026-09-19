@@ -158,7 +158,7 @@ review_logs   -- for progress stats & history
 - Goal: **recall by speaking**, not pronunciation scoring. All in-browser, free, no Gemini quota.
 - Audio: `speechSynthesis` (`ja-JP`) reads the `reading` (fallback `term`). Play button on the revealed card + Browse detail sheet; auto-plays on reveal in Speak mode. Nothing stored.
 - Practice **Flip | Speak** toggle (persisted in `localStorage`). Speak card shows the ID/EN meaning → mic → Web Speech API (`ja-JP`, 5 alternatives) → "Heard X ✓/✗" via `lib/speech.ts#isMatch` (term or reading, katakana≈hiragana). User still rates; a miss only highlights Forgot. Shares SM-2 state with Flip.
-- Support (tested 2026-09): Chrome ✓, iOS home-screen PWA ✓, Safari tabs (iOS/macOS) ✗ `service-not-allowed` unless Dictation/Speech Recognition is enabled → Speak card shows a Settings hint; "Show answer" still works. Gemini audio fallback deferred until needed.
+- Support (tested 2026-09): Chrome ✓, iOS home-screen PWA ✓, iOS Safari ✓, macOS Safari ✓ (needs manual Stop: it never finalizes, so interim results are kept and flushed on stop). Safari needs Dictation on (+ Japanese dictation language downloaded on macOS), else `service-not-allowed` → Speak card shows a Settings hint; "Show answer" still works. Gemini audio fallback deferred until needed.
 
 ### Phase 6 — (Optional) Push reminders
 - iOS 26+ supports web push for installed PWAs, so this is fully viable on the user's phone.
