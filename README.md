@@ -12,17 +12,20 @@ A personal Japanese vocabulary notebook — capture words with AI auto-fill, rem
 
 I'm an Indonesian developer living in Japan. I pick up new words every day — from friends, dramas, anime, signs, social media — and forget them almost immediately. Notes apps get messy and I lose track of where a word came from.
 
-tangocho is built around three ideas:
+tangocho is built around four ideas:
 
 - **Capture** — type a word; it auto-fills the reading (furigana), **Indonesian** + **English** meanings, and an example sentence, so adding a word takes seconds. Tag the source — _"Midnight Diner S2 Ep.3"_, _"Sato-san at work"_, _"Twitter"_ — because the memory of where you heard it is half of remembering it.
 - **Browse** — every word as a table or bento grid, with furigana, filterable by source, mastery, or what's due.
 - **Practice** — SM-2 spaced-repetition flashcards so saved words actually stick.
+- **Speak** — see the meaning, say the word out loud. Reading a word isn't the same as being able to say it.
 
 ## Features
 
 - 🤖 **AI auto-fill** — Jisho (reliable readings / English / JLPT) with a Gemini fallback for slang and the Indonesian meaning + examples
 - 🏷️ **Structured sources** — type + name + detail, with autocomplete of past sources
 - 🔁 **SM-2 spaced repetition** — flip cards, rate _forgot / hard / easy_, auto-scheduled reviews + due badge
+- 🎙️ **Speak mode** — say the word from its meaning; speech recognition checks it, then the app plays the correct pronunciation (in-browser, free, no audio stored)
+- 🔊 **Pronunciation audio** — play any word in Practice or Browse
 - 📊 **Progress** — mastery distribution, review streak, last-14-days activity
 - 📱 **PWA** — installable, offline shell, home-screen icon (守)
 - 🔒 **Private** — Google OAuth + single-email allowlist, Postgres row-level security on every table
@@ -36,14 +39,16 @@ tangocho is built around three ideas:
 | **Data & auth** | Supabase Postgres + Google OAuth via `@supabase/ssr`; RLS (`user_id = auth.uid()`) on every table |
 | **AI** | Vercel AI SDK v6 + `@ai-sdk/google` (`gemini-2.5-flash`), structured output via `generateObject` + Zod |
 | **Dictionary** | Jisho public API (primary) → Gemini (fallback / Indonesian + examples) |
+| **Speech** | Web Speech API — `SpeechRecognition` (`ja-JP`) + `speechSynthesis`, no server or quota |
 | **Hosting** | Vercel + Supabase, entirely on free tiers |
-| **Tests** | Vitest (SM-2 engine) |
+| **Tests** | Vitest (SM-2 engine, Jisho matching, speech matching, progress stats) |
 
 A few details worth highlighting:
 
 - **Enrichment pipeline** (`app/api/enrich`, `lib/jisho.ts`, `lib/enrich/schema.ts`) — Jisho is queried first for accurate readings/POS/JLPT; Gemini always supplies the Indonesian meaning + example and fully fills slang words Jisho doesn't know. Input is debounced (`useDebounce`) with an IME-composition guard so keystrokes don't burn API calls.
 - **Auth & isolation** — a single `ALLOWED_EMAIL` is enforced in proxy middleware; non-allowlisted Google accounts get a friendly "not you" screen. RLS means even a leaked anon key exposes nothing.
 - **SM-2** (`lib/srs.ts`) — a pure, unit-tested 3-button variant (forgot→q2, hard→q3, easy→q5) computing ease factor, interval, and next due date.
+- **Speak mode** (`lib/speech.ts`, `components/practice/useSpeechRecognition.ts`) — recognition alternatives are matched against the term *or* its reading (katakana folded to hiragana). A match only suggests the rating; you still rate, so a mishearing never corrupts the schedule. Interim results are kept and flushed on stop, because macOS Safari never finalizes on its own.
 
 ## Project structure
 
@@ -55,7 +60,7 @@ app/
   auth/callback/    # OAuth code exchange + allowlist enforcement
   api/enrich/       # Jisho + Gemini enrichment
 components/         # ui primitives (Card/Button/Badge), SourceField, flashcards…
-lib/                # supabase clients, srs, jisho, mastery, hooks
+lib/                # supabase clients, srs, speech, jisho, mastery, hooks
 supabase/migrations # schema + RLS
 proxy.ts            # session refresh + route protection + allowlist
 ```
@@ -83,7 +88,7 @@ Commands:
 npm run dev     # dev server (Turbopack)
 npm run build   # production build
 npm run lint    # ESLint
-npm test        # vitest (SM-2 unit tests)
+npm test        # vitest unit tests
 ```
 
 Database migrations live in `supabase/migrations/` (`supabase db push` to apply).
