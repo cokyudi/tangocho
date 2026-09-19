@@ -14,6 +14,7 @@ const shots: Shot[] = [
   { src: '/screenshots/browse.png', alt: 'Browse list with filters', caption: 'Browse · filter & search' },
   { src: '/screenshots/detail.png', alt: 'Word detail with furigana example', caption: 'Detail · meaning, example, source' },
   { src: '/screenshots/practice.png', alt: 'Practice flashcard', caption: 'Practice · SM-2 flashcards' },
+  { src: '/screenshots/speak.png', alt: 'Speak mode: meaning shown, spoken answer heard and marked correct', caption: 'Speak · say it out loud' },
   { src: '/screenshots/progress.png', alt: 'Progress dashboard', caption: 'Progress · mastery & streak' },
   { src: '/screenshots/home.png', alt: 'Home dashboard', caption: 'Home · at a glance' },
 ];
