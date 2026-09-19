@@ -106,6 +106,11 @@ export default async function ProgressPage() {
           </a>
         </Card>
       </section>
+
+      {/* ponytail: temporary link to the speech spike, remove with app/(app)/speech-test */}
+      <Link href="/speech-test" className="block text-center text-xs text-muted underline">
+        Speech test
+      </Link>
     </div>
   );
 }
