@@ -34,7 +34,7 @@ stops mid-feature. Resume = start the next phase cold.
 | **Domain** | `tangocho.yudidputra.com` (separate Vercel project + subdomain). |
 | **PWA** | Installable, offline shell, home-screen icon. |
 
-**Non-goals:** multi-user, sharing, audio/TTS, image OCR, native apps, web-push (until Phase 6).
+**Non-goals:** multi-user, sharing, pronunciation scoring (pitch accent), image OCR, native apps, web-push (until Phase 6).
 
 ---
 
@@ -153,6 +153,12 @@ review_logs   -- for progress stats & history
 - Empty states, loading skeletons, error toasts, keyboard shortcuts.
 - A11y pass (`a11y-audit` skill) + perf pass (`perf-audit` skill); `@vercel/analytics` + speed-insights; CSP headers (copy portfolio `next.config.js`).
 - **Deliverable:** installable PWA + progress view. **Verify:** install to home screen; offline shell loads; Lighthouse PWA + a11y green.
+
+### Speak mode (post-MVP)
+- Goal: **recall by speaking**, not pronunciation scoring. All in-browser, free, no Gemini quota.
+- Audio: `speechSynthesis` (`ja-JP`) reads the `reading` (fallback `term`). Play button on the revealed card + Browse detail sheet; auto-plays on reveal in Speak mode. Nothing stored.
+- Practice **Flip | Speak** toggle (persisted in `localStorage`). Speak card shows the ID/EN meaning → mic → Web Speech API (`ja-JP`, 5 alternatives) → "Heard X ✓/✗" via `lib/speech.ts#isMatch` (term or reading, katakana≈hiragana). User still rates; a miss only highlights Forgot. Shares SM-2 state with Flip.
+- Support (tested 2026-09): Chrome ✓, iOS home-screen PWA ✓, Safari tabs (iOS/macOS) ✗ `service-not-allowed` unless Dictation/Speech Recognition is enabled → Speak card shows a Settings hint; "Show answer" still works. Gemini audio fallback deferred until needed.
 
 ### Phase 6 — (Optional) Push reminders
 - iOS 26+ supports web push for installed PWAs, so this is fully viable on the user's phone.

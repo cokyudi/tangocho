@@ -20,10 +20,13 @@ export default function RatingButtons({
   word,
   pending,
   onRate,
+  suggest,
 }: {
   word: PracticeWord;
   pending: Rating | null;
   onRate: (rating: Rating) => void;
+  // Highlight this rating instead of the default (Easy), e.g. Forgot after a missed Speak.
+  suggest?: Rating;
 }) {
   return (
     <div className="grid grid-cols-3 gap-2">
@@ -39,7 +42,7 @@ export default function RatingButtons({
         return (
           <Button
             key={rating}
-            variant={variant}
+            variant={suggest ? (rating === suggest ? 'accent' : 'neutral') : variant}
             onClick={() => onRate(rating)}
             disabled={pending !== null}
             className="flex-col !px-2 !py-3"

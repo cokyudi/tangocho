@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { X, Pencil, Trash2, Loader2, Volume2 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Furigana from '@/components/Furigana';
@@ -8,6 +8,7 @@ import FuriganaText from '@/components/FuriganaText';
 import { masteryLevel, masteryVariant, isDue, MASTERY_LABELS } from '@/lib/mastery';
 import type { BrowseWord } from '@/components/browse/types';
 import { useDeleteWord } from '@/components/browse/useDeleteWord';
+import { speak } from '@/lib/speech';
 
 export default function WordDetailSheet({
   word,
@@ -40,14 +41,24 @@ export default function WordDetailSheet({
             <Furigana term={word.term} reading={word.reading} className="text-3xl text-ink" />
             {meta && <p className="mt-1 font-jp text-sm text-muted">{meta}</p>}
           </div>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center border-2 border-ink bg-surface shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              aria-label="Play pronunciation"
+              onClick={() => speak(word.reading ?? word.term)}
+              className="inline-flex h-9 w-9 items-center justify-center border-2 border-ink bg-surface shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
+            >
+              <Volume2 className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="inline-flex h-9 w-9 items-center justify-center border-2 border-ink bg-surface shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Meanings */}

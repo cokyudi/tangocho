@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { reviewWord } from '@/app/(app)/practice/actions';
 import { reviewSrs, type Rating } from '@/lib/srs';
+import { isMatch, speak } from '@/lib/speech';
 import type { PracticeWord } from '@/components/practice/PracticeClient';
 
 type QueueWord = PracticeWord & { relearn?: boolean };
+export type Mode = 'flip' | 'speak';
+const MODE_KEY = 'practice-mode';
 
 export function usePracticeSession(words: PracticeWord[]) {
   const [queue, setQueue] = useState<QueueWord[]>(words);
@@ -12,6 +15,14 @@ export function usePracticeSession(words: PracticeWord[]) {
   const [showFurigana, setShowFurigana] = useState(false);
   const [pending, setPending] = useState<Rating | null>(null);
   const [reviewed, setReviewed] = useState(0);
+  const [mode, setMode] = useState<Mode>('flip');
+  const [spoken, setSpoken] = useState<{ heard: string; matched: boolean } | null>(null);
+
+  useEffect(() => {
+    // Read the persisted mode after mount (localStorage is client-only).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (localStorage.getItem(MODE_KEY) === 'speak') setMode('speak');
+  }, []);
 
   const total = queue.length;
   const word = queue[pos];
@@ -46,6 +57,22 @@ export function usePracticeSession(words: PracticeWord[]) {
     setPos((p) => p + 1);
     setFlipped(false);
     setShowFurigana(false);
+    setSpoken(null);
+  }
+
+  function changeMode(next: Mode) {
+    setMode(next);
+    localStorage.setItem(MODE_KEY, next);
+  }
+
+  function showAnswer() {
+    setFlipped(true);
+    if (mode === 'speak' && word) speak(word.reading ?? word.term);
+  }
+
+  function onHeard(transcripts: string[]) {
+    if (!word) return;
+    setSpoken({ heard: transcripts[0] ?? '', matched: isMatch(transcripts, word) });
   }
 
   return {
@@ -55,10 +82,14 @@ export function usePracticeSession(words: PracticeWord[]) {
     reviewed,
     flipped,
     flip: () => setFlipped((f) => !f),
-    showAnswer: () => setFlipped(true),
+    showAnswer,
     showFurigana,
     toggleFurigana: () => setShowFurigana((s) => !s),
     pending,
     rate,
+    mode,
+    changeMode,
+    spoken,
+    onHeard,
   };
 }
