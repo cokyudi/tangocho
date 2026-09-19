@@ -4,13 +4,9 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import PhoneFrame from '@/components/about/PhoneFrame';
 
-const screens = [
-  { src: '/screenshots/capture.png', alt: 'Capture screen' },
-  { src: '/screenshots/practice.png', alt: 'Practice flashcard' },
-  { src: '/screenshots/browse.png', alt: 'Browse list' },
-];
+const screens = ['/screenshots/capture.png', '/screenshots/practice.png', '/screenshots/browse.png'];
 
-export default function HeroMockup() {
+export default function HeroMockup({ alts }: { alts: string[] }) {
   const [i, setI] = useState(0);
   const reduce = useReducedMotion();
 
@@ -28,7 +24,7 @@ export default function HeroMockup() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <PhoneFrame src={screens[i].src} alt={screens[i].alt} priority={i === 0} />
+        <PhoneFrame src={screens[i]} alt={alts[i]} priority={i === 0} />
       </motion.div>
     </div>
   );

@@ -7,7 +7,13 @@ import PhoneFrame from '@/components/about/PhoneFrame';
 
 export type Shot = { src: string; alt: string; caption: string };
 
-export default function ScreenshotCarousel({ shots }: { shots: Shot[] }) {
+export default function ScreenshotCarousel({
+  shots,
+  labels,
+}: {
+  shots: Shot[];
+  labels: { prev: string; next: string; goTo: (n: number) => string };
+}) {
   const n = shots.length;
   const [[index, dir], setState] = useState<[number, number]>([0, 0]);
   const [paused, setPaused] = useState(false);
@@ -32,7 +38,7 @@ export default function ScreenshotCarousel({ shots }: { shots: Shot[] }) {
       onBlurCapture={() => setPaused(false)}
     >
       <div className="flex items-center justify-center gap-3 sm:gap-6">
-        <Arrow label="Previous screen" onClick={() => go(-1)}>
+        <Arrow label={labels.prev} onClick={() => go(-1)}>
           <ChevronLeft className="h-5 w-5" />
         </Arrow>
 
@@ -55,7 +61,7 @@ export default function ScreenshotCarousel({ shots }: { shots: Shot[] }) {
           </motion.div>
         </div>
 
-        <Arrow label="Next screen" onClick={() => go(1)}>
+        <Arrow label={labels.next} onClick={() => go(1)}>
           <ChevronRight className="h-5 w-5" />
         </Arrow>
       </div>
@@ -67,7 +73,7 @@ export default function ScreenshotCarousel({ shots }: { shots: Shot[] }) {
           <button
             key={s.src}
             type="button"
-            aria-label={`Go to screen ${i + 1}`}
+            aria-label={labels.goTo(i + 1)}
             aria-current={i === index}
             onClick={() => to(i)}
             className={`h-3 w-3 border-2 border-ink transition-colors ${

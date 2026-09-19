@@ -7,24 +7,10 @@ import ThemeSwitch from '@/components/ThemeSwitch';
 import Reveal from '@/components/about/Reveal';
 import AboutHero from '@/components/about/AboutHero';
 import SourceMarquee from '@/components/about/SourceMarquee';
-import ScreenshotCarousel, { type Shot } from '@/components/about/ScreenshotCarousel';
+import ScreenshotCarousel from '@/components/about/ScreenshotCarousel';
+import { useAboutLanguage } from '@/components/about/useAboutLanguage';
 
-const shots: Shot[] = [
-  { src: '/screenshots/capture.png', alt: 'Capture screen auto-filling a word', caption: 'Capture · AI auto-fill' },
-  { src: '/screenshots/browse.png', alt: 'Browse list with filters', caption: 'Browse · filter & search' },
-  { src: '/screenshots/detail.png', alt: 'Word detail with furigana example', caption: 'Detail · meaning, example, source' },
-  { src: '/screenshots/practice.png', alt: 'Practice flashcard', caption: 'Practice · SM-2 flashcards' },
-  { src: '/screenshots/speak.png', alt: 'Speak mode: meaning shown, spoken answer heard and marked correct', caption: 'Speak · say it out loud' },
-  { src: '/screenshots/progress.png', alt: 'Progress dashboard', caption: 'Progress · mastery & streak' },
-  { src: '/screenshots/home.png', alt: 'Home dashboard', caption: 'Home · at a glance' },
-];
-
-const features = [
-  { title: 'Capture', jp: '取り込む', body: 'Type a word; Jisho + Gemini auto-fill the reading, Indonesian & English meanings, and an example. Tag where you heard it.' },
-  { title: 'Browse', jp: '一覧', body: 'Every word as a table or bento grid, with furigana. Filter by source, mastery, or what’s due. Tap for full detail.' },
-  { title: 'Practice', jp: '復習', body: 'SM-2 spaced-repetition flashcards. Flip, rate forgot / hard / easy, and the app schedules the next review.' },
-  { title: 'Speak', jp: '話す', body: 'See the meaning, say the word out loud. Speech recognition checks what it heard against the word, then plays the correct pronunciation so you can compare.' },
-];
+const SHOT_ORDER = ['capture', 'browse', 'detail', 'practice', 'speak', 'progress', 'home'] as const;
 
 const stack = [
   'Next.js 16 (App Router)',
@@ -40,19 +26,32 @@ const stack = [
 ];
 
 export default function AboutContent() {
+  const { t, toggleLanguage } = useAboutLanguage();
+  const shots = SHOT_ORDER.map((id) => ({ src: `/screenshots/${id}.png`, ...t.shots[id] }));
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4">
         <span className="font-display text-xl font-bold text-ink">
           tangocho<span className="ml-1 text-accent">単語帳</span>
         </span>
-        <ThemeSwitch />
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            aria-label={t.toggle.aria}
+            className="inline-flex h-11 min-w-11 items-center justify-center border-2 border-ink bg-surface px-2 font-display text-sm font-bold text-fg shadow-retro-sm transition-transform duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:text-accent active:translate-x-0.5 active:translate-y-0.5 active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            {t.toggle.label}
+          </button>
+          <ThemeSwitch />
+        </div>
       </header>
 
       <main className="mx-auto w-full max-w-3xl space-y-14 px-4 pb-16 pt-6">
         {/* Hero */}
         <Reveal>
-          <AboutHero />
+          <AboutHero t={t.hero} />
         </Reveal>
 
         {/* Source marquee */}
@@ -62,7 +61,7 @@ export default function AboutContent() {
 
         {/* Features */}
         <section className="grid gap-4 sm:grid-cols-2">
-          {features.map((f, i) => (
+          {t.features.map((f, i) => (
             <Reveal key={f.title} delay={i * 0.08}>
               <Card className="h-full space-y-2 p-5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5">
                 <h2 className="font-display text-lg font-bold text-ink">
@@ -77,25 +76,26 @@ export default function AboutContent() {
         {/* Screenshots carousel */}
         <Reveal>
           <section className="space-y-5">
-            <h2 className="font-display text-2xl font-bold text-ink">See it in action</h2>
-            <ScreenshotCarousel shots={shots} />
+            <h2 className="font-display text-2xl font-bold text-ink">{t.seeIt}</h2>
+            <ScreenshotCarousel shots={shots} labels={t.carousel} />
           </section>
         </Reveal>
 
         {/* How it's built */}
         <Reveal>
           <section className="space-y-4">
-            <h2 className="font-display text-2xl font-bold text-ink">How it’s built</h2>
+            <h2 className="font-display text-2xl font-bold text-ink">{t.builtHeading}</h2>
             <Card className="space-y-4 p-5">
               <p className="text-muted">
-                A full-stack PWA on entirely free tiers. Words are auto-enriched by a{' '}
-                <span className="font-bold text-ink">Jisho → Gemini fallback</span> pipeline, review
-                scheduling uses a hand-implemented <span className="font-bold text-ink">SM-2</span>{' '}
-                algorithm, Speak mode runs entirely in the browser on the{' '}
-                <span className="font-bold text-ink">Web Speech API</span> (recognition + Japanese
-                text-to-speech, no audio stored), and every row is protected by Postgres{' '}
-                <span className="font-bold text-ink">row-level security</span> with a single-user
-                Google OAuth allowlist.
+                {t.built.map((seg, k) =>
+                  k % 2 ? (
+                    <span key={k} className="font-bold text-ink">
+                      {seg}
+                    </span>
+                  ) : (
+                    seg
+                  ),
+                )}
               </p>
               <div className="flex flex-wrap gap-2">
                 {stack.map((s) => (
@@ -109,11 +109,11 @@ export default function AboutContent() {
         </Reveal>
 
         <footer className="border-t-2 border-ink/15 pt-6 text-sm text-muted">
-          Built by{' '}
+          {t.footerBefore}
           <Link href="https://yudidputra.com" className="font-display font-bold text-accent">
             Yudi Dharma Putra
           </Link>
-          .
+          {t.footerAfter}
         </footer>
       </main>
     </div>
