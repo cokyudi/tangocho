@@ -150,7 +150,7 @@ review_logs   -- for progress stats & history
 ### Phase 5 — PWA + progress + polish
 - `manifest.ts` + icons + service worker (offline app shell; e.g. Serwist or next-pwa). Installable on iOS/Android home screen.
 - Progress dashboard: total words, mastery distribution, reviews-per-day streak/heatmap (from `review_logs`), words added over time.
-- Empty states, loading skeletons, error toasts, keyboard shortcuts.
+- Empty states, loading skeletons, error toasts. (Keyboard shortcuts dropped: mobile-first; buttons are already keyboard-accessible.)
 - A11y pass (`a11y-audit` skill) + perf pass (`perf-audit` skill); `@vercel/analytics` + speed-insights; CSP headers (copy portfolio `next.config.js`).
 - **Deliverable:** installable PWA + progress view. **Verify:** install to home screen; offline shell loads; Lighthouse PWA + a11y green.
 
