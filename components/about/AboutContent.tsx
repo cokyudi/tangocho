@@ -22,6 +22,7 @@ const features = [
   { title: 'Capture', jp: '取り込む', body: 'Type a word; Jisho + Gemini auto-fill the reading, Indonesian & English meanings, and an example. Tag where you heard it.' },
   { title: 'Browse', jp: '一覧', body: 'Every word as a table or bento grid, with furigana. Filter by source, mastery, or what’s due. Tap for full detail.' },
   { title: 'Practice', jp: '復習', body: 'SM-2 spaced-repetition flashcards. Flip, rate forgot / hard / easy, and the app schedules the next review.' },
+  { title: 'Speak', jp: '話す', body: 'See the meaning, say the word out loud. Speech recognition checks what it heard against the word, then plays the correct pronunciation so you can compare.' },
 ];
 
 const stack = [
@@ -32,6 +33,7 @@ const stack = [
   'Vercel AI SDK + Gemini',
   'Jisho API',
   'SM-2 algorithm',
+  'Web Speech API',
   'Tailwind CSS',
   'PWA',
 ];
@@ -58,7 +60,7 @@ export default function AboutContent() {
         </Reveal>
 
         {/* Features */}
-        <section className="grid gap-4 sm:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 0.08}>
               <Card className="h-full space-y-2 p-5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5">
@@ -88,7 +90,9 @@ export default function AboutContent() {
                 A full-stack PWA on entirely free tiers. Words are auto-enriched by a{' '}
                 <span className="font-bold text-ink">Jisho → Gemini fallback</span> pipeline, review
                 scheduling uses a hand-implemented <span className="font-bold text-ink">SM-2</span>{' '}
-                algorithm, and every row is protected by Postgres{' '}
+                algorithm, Speak mode runs entirely in the browser on the{' '}
+                <span className="font-bold text-ink">Web Speech API</span> (recognition + Japanese
+                text-to-speech, no audio stored), and every row is protected by Postgres{' '}
                 <span className="font-bold text-ink">row-level security</span> with a single-user
                 Google OAuth allowlist.
               </p>
