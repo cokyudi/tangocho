@@ -21,12 +21,20 @@ export function useSpeechRecognition(onResult: (transcripts: string[]) => void) 
     if (!r) return setError(ERRORS.unsupported);
     ref.current = r;
     setError(null);
-    r.onresult = (e) => onResult(Array.from(e.results[0], (a) => a.transcript));
+    // Report once on end with the latest (possibly interim) result: Safari
+    // may only ever deliver interim results, flushed when stop() is called.
+    let latest: string[] | null = null;
+    r.onresult = (e) => {
+      latest = Array.from(e.results[0], (a) => a.transcript);
+    };
     r.onerror = (e) => setError(ERRORS[e.error] ?? `Speech recognition error: ${e.error}`);
-    r.onend = () => setListening(false);
+    r.onend = () => {
+      setListening(false);
+      if (latest) onResult(latest);
+    };
     setListening(true);
     r.start();
   }
 
-  return { listening, error, listen };
+  return { listening, error, listen, stop: () => ref.current?.stop() };
 }

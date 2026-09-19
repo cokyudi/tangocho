@@ -9,6 +9,7 @@ export type Recognition = {
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start: () => void;
+  stop: () => void;
   abort: () => void;
 };
 
@@ -19,7 +20,8 @@ export function createRecognition(): Recognition | null {
   const r = new Ctor();
   r.lang = 'ja-JP';
   r.maxAlternatives = 5;
-  r.interimResults = false;
+  // Interim on: Safari often never finalizes, so the hook keeps the latest partial.
+  r.interimResults = true;
   return r;
 }
 

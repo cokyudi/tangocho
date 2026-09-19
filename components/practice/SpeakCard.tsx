@@ -1,4 +1,4 @@
-import { Mic, Loader2 } from 'lucide-react';
+import { Mic, Square } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import SpokenResult from '@/components/practice/SpokenResult';
 import { useSpeechRecognition } from '@/components/practice/useSpeechRecognition';
@@ -13,7 +13,7 @@ export default function SpeakCard({
   spoken: { heard: string; matched: boolean } | null;
   onHeard: (transcripts: string[]) => void;
 }) {
-  const { listening, error, listen } = useSpeechRecognition(onHeard);
+  const { listening, error, listen, stop } = useSpeechRecognition(onHeard);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 border-2 border-ink bg-surface p-6 text-center shadow-retro-lg">
@@ -23,9 +23,9 @@ export default function SpeakCard({
         {word.meaning_id && word.meaning_en && <p className="text-muted">{word.meaning_en}</p>}
       </div>
 
-      <Button onClick={listen} disabled={listening} variant={spoken ? 'neutral' : 'accent'}>
-        {listening ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
-        {listening ? 'Listening…' : spoken ? 'Try again' : 'Speak'}
+      <Button onClick={listening ? stop : listen} variant={spoken && !listening ? 'neutral' : 'accent'}>
+        {listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        {listening ? 'Listening… tap to stop' : spoken ? 'Try again' : 'Speak'}
       </Button>
 
       <div aria-live="polite" className="min-h-6 text-sm">
