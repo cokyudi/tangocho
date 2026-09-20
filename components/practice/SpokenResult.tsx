@@ -1,6 +1,8 @@
 import { Check, X } from 'lucide-react';
 
-export default function SpokenResult({ spoken }: { spoken: { heard: string; matched: boolean } }) {
+import type { Spoken } from '@/components/practice/usePracticeSession';
+
+export default function SpokenResult({ spoken }: { spoken: Spoken }) {
   const Icon = spoken.matched ? Check : X;
   return (
     <p className="inline-flex items-center gap-1.5 text-muted">
@@ -10,6 +12,7 @@ export default function SpokenResult({ spoken }: { spoken: { heard: string; matc
         className={`h-5 w-5 ${spoken.matched ? 'text-ink' : 'text-accent'}`}
         strokeWidth={3}
       />
+      {spoken.note && <span className="text-xs">{spoken.note}</span>}
     </p>
   );
 }

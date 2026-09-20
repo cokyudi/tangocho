@@ -3,6 +3,7 @@ import Button from '@/components/ui/Button';
 import SpokenResult from '@/components/practice/SpokenResult';
 import { useSpeechRecognition } from '@/components/practice/useSpeechRecognition';
 import type { PracticeWord } from '@/components/practice/PracticeClient';
+import type { Spoken } from '@/components/practice/usePracticeSession';
 
 export default function SpeakCard({
   word,
@@ -10,7 +11,7 @@ export default function SpeakCard({
   onHeard,
 }: {
   word: PracticeWord;
-  spoken: { heard: string; matched: boolean } | null;
+  spoken: Spoken | null;
   onHeard: (transcripts: string[]) => void;
 }) {
   const { listening, error, listen, stop } = useSpeechRecognition(onHeard);

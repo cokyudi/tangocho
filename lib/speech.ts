@@ -52,3 +52,20 @@ export function isMatch(transcripts: string[], word: { term: string; reading: st
     return targets.some((t) => heard === t || (t.length >= 2 && heard.includes(t)));
   });
 }
+
+// Reading of a heard term, via Jisho (server route). Cached per session;
+// null when unknown or the lookup fails.
+const readings = new Map<string, string | null>();
+
+export async function lookupReading(term: string): Promise<string | null> {
+  if (readings.has(term)) return readings.get(term)!;
+  let reading: string | null = null;
+  try {
+    const res = await fetch(`/api/reading?q=${encodeURIComponent(term)}`);
+    if (res.ok) reading = ((await res.json()) as { reading: string | null }).reading;
+  } catch {
+    reading = null;
+  }
+  readings.set(term, reading);
+  return reading;
+}

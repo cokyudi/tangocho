@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { reviewWord } from '@/app/(app)/practice/actions';
 import { reviewSrs, type Rating } from '@/lib/srs';
-import { isMatch, speak } from '@/lib/speech';
+import { isMatch, lookupReading, normalize, speak } from '@/lib/speech';
 import type { PracticeWord } from '@/components/practice/PracticeClient';
 
 type QueueWord = PracticeWord & { relearn?: boolean };
 export type Mode = 'flip' | 'speak';
+export type Spoken = { heard: string; matched: boolean; note?: string };
 const MODE_KEY = 'practice-mode';
 
 export function usePracticeSession(words: PracticeWord[]) {
@@ -16,7 +17,9 @@ export function usePracticeSession(words: PracticeWord[]) {
   const [pending, setPending] = useState<Rating | null>(null);
   const [reviewed, setReviewed] = useState(0);
   const [mode, setMode] = useState<Mode>('flip');
-  const [spoken, setSpoken] = useState<{ heard: string; matched: boolean } | null>(null);
+  const [spoken, setSpoken] = useState<Spoken | null>(null);
+  // Guards the async homophone lookup against landing on a later card.
+  const heardId = useRef(0);
 
   useEffect(() => {
     // Read the persisted mode after mount (localStorage is client-only).
@@ -58,6 +61,7 @@ export function usePracticeSession(words: PracticeWord[]) {
     setFlipped(false);
     setShowFurigana(false);
     setSpoken(null);
+    heardId.current++;
   }
 
   function changeMode(next: Mode) {
@@ -70,9 +74,24 @@ export function usePracticeSession(words: PracticeWord[]) {
     if (mode === 'speak' && word) speak(word.reading ?? word.term);
   }
 
-  function onHeard(transcripts: string[]) {
+  async function onHeard(transcripts: string[]) {
     if (!word) return;
-    setSpoken({ heard: transcripts[0] ?? '', matched: isMatch(transcripts, word) });
+    const id = ++heardId.current;
+    const heard = transcripts[0] ?? '';
+    if (isMatch(transcripts, word)) return setSpoken({ heard, matched: true });
+    setSpoken({ heard, matched: false });
+
+    // Homophone: recognition picked different kanji with the same reading
+    // (鑑賞 for 感傷). Said correctly, so accept it and say why.
+    const target = normalize(word.reading ?? word.term);
+    for (const t of transcripts.slice(0, 3)) {
+      const reading = await lookupReading(t);
+      if (heardId.current !== id) return;
+      if (reading && normalize(reading) === target) {
+        setSpoken({ heard: t, matched: true, note: `same reading · ${reading}` });
+        return;
+      }
+    }
   }
 
   return {
