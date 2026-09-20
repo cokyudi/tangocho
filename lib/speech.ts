@@ -21,7 +21,9 @@ export function createRecognition(): Recognition | null {
   if (!Ctor) return null;
   const r = new Ctor();
   r.lang = 'ja-JP';
-  r.maxAlternatives = 5;
+  // One alternative only: judge what was actually said, not the recognizer's
+  // 4 runner-up guesses (らきょう would pass because 妥協 sat further down).
+  r.maxAlternatives = 1;
   // Interim on: Safari often never finalizes, so the hook keeps the latest partial.
   r.interimResults = true;
   return r;
@@ -42,15 +44,15 @@ export function normalize(s: string) {
     .replace(/[\s\p{P}]/gu, '');
 }
 
-// True if any recognition alternative is the term or its reading. Also accepts
-// the target inside a longer phrase (食べ物です), but only for 2+ chars so a
-// one-kana word can't match by accident.
-export function isMatch(transcripts: string[], word: { term: string; reading: string | null }) {
-  const targets = [word.term, word.reading].filter(Boolean).map((t) => normalize(t!));
-  return transcripts.some((raw) => {
-    const heard = normalize(raw);
-    return targets.some((t) => heard === t || (t.length >= 2 && heard.includes(t)));
-  });
+// True if what was heard is the term or its reading. Also accepts the target
+// inside a longer phrase (食べ物です), but only for 2+ chars so a one-kana word
+// can't match by accident.
+export function isMatch(raw: string, word: { term: string; reading: string | null }) {
+  const heard = normalize(raw);
+  return [word.term, word.reading]
+    .filter(Boolean)
+    .map((t) => normalize(t!))
+    .some((t) => heard === t || (t.length >= 2 && heard.includes(t)));
 }
 
 export const isKana = (s: string) => /^[\u3041-\u309f\u30a0-\u30ff\u30fc]+$/.test(normalize(s));

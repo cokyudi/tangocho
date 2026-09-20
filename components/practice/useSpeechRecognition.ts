@@ -9,7 +9,7 @@ const ERRORS: Record<string, string> = {
 };
 ERRORS['service-not-allowed'] = ERRORS['not-allowed'];
 
-export function useSpeechRecognition(onResult: (transcripts: string[]) => void) {
+export function useSpeechRecognition(onResult: (heard: string) => void) {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<Recognition | null>(null);
@@ -34,9 +34,9 @@ export function useSpeechRecognition(onResult: (transcripts: string[]) => void) 
     setError(null);
     // Report once on end with the latest (possibly interim) result: Safari
     // may only ever deliver interim results, flushed when stop() is called.
-    let latest: string[] | null = null;
+    let latest: string | null = null;
     r.onresult = (e) => {
-      latest = Array.from(e.results[0], (a) => a.transcript);
+      latest = e.results[0][0]?.transcript ?? null;
       clearTimers();
       // Close the mic as soon as we have the answer: on a final result, or
       // after a beat of silence (Safari never finalizes on its own).

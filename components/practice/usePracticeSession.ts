@@ -76,13 +76,12 @@ export function usePracticeSession(words: PracticeWord[]) {
     if (mode === 'speak' && word) speak(word.reading ?? word.term);
   }
 
-  async function onHeard(transcripts: string[]) {
+  async function onHeard(heard: string) {
     if (!word) return;
     const id = ++heardId.current;
-    const heard = transcripts[0] ?? '';
     const kanjiNote = (t: string) => (isKana(t) ? undefined : t);
 
-    if (isMatch(transcripts, word)) {
+    if (isMatch(heard, word)) {
       // Show the reading rather than the kanji it happened to pick.
       const kana = isKana(heard) ? heard : (word.reading ?? heard);
       return setSpoken({ text: kana, status: 'match' });
@@ -91,22 +90,16 @@ export function usePracticeSession(words: PracticeWord[]) {
     // Homophone: recognition picked different kanji with the same reading
     // (鑑賞 for 感傷). Said correctly, so accept it. Stay in 'checking' until
     // Jisho answers instead of flashing a ✗ that then turns into a ✓.
-    const candidates = transcripts.slice(0, 3).filter((t) => !isKana(t));
-    if (!candidates.length) return setSpoken({ text: heard, status: 'miss' });
+    if (isKana(heard)) return setSpoken({ text: heard, status: 'miss' });
 
     setSpoken({ text: heard, status: 'checking' });
-    const target = normalize(word.reading ?? word.term);
-    let kana: string | null = null;
-    for (const t of candidates) {
-      const reading = await lookupReading(t);
-      if (heardId.current !== id) return;
-      if (reading && normalize(reading) === target) {
-        // Don't show the recognized kanji (鑑賞): it isn't this card's word.
-        return setSpoken({ text: reading, status: 'match', note: 'same reading' });
-      }
-      kana ??= t === heard ? reading : null;
+    const reading = await lookupReading(heard);
+    if (heardId.current !== id) return;
+    if (reading && normalize(reading) === normalize(word.reading ?? word.term)) {
+      // Don't show the recognized kanji (鑑賞): it isn't this card's word.
+      return setSpoken({ text: reading, status: 'match', note: 'same reading' });
     }
-    setSpoken({ text: kana ?? heard, status: 'miss', note: kana ? kanjiNote(heard) : undefined });
+    setSpoken({ text: reading ?? heard, status: 'miss', note: reading ? kanjiNote(heard) : undefined });
   }
 
   return {

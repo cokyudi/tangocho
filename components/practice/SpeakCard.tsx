@@ -12,7 +12,7 @@ export default function SpeakCard({
 }: {
   word: PracticeWord;
   spoken: Spoken | null;
-  onHeard: (transcripts: string[]) => void;
+  onHeard: (heard: string) => void;
 }) {
   const { listening, error, listen, stop } = useSpeechRecognition(onHeard);
 

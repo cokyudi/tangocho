@@ -11,32 +11,33 @@ describe('normalize', () => {
 
 describe('isMatch', () => {
   it('matches the kanji term', () => {
-    expect(isMatch(['食べ物'], tabemono)).toBe(true);
+    expect(isMatch('食べ物', tabemono)).toBe(true);
   });
 
   it('matches the reading, in katakana too', () => {
-    expect(isMatch(['タベモノ'], tabemono)).toBe(true);
+    expect(isMatch('タベモノ', tabemono)).toBe(true);
   });
 
-  it('matches any alternative, not just the first', () => {
-    expect(isMatch(['食べる', 'たべもの'], tabemono)).toBe(true);
+  it('judges only what was heard, not the recognizer runner-ups', () => {
+    // らきょう must fail 妥協 even though 妥協 was offered as an alternative.
+    expect(isMatch('らきょう', { term: '妥協', reading: 'だきょう' })).toBe(false);
   });
 
   it('accepts the word inside a short phrase', () => {
-    expect(isMatch(['食べ物です'], tabemono)).toBe(true);
+    expect(isMatch('食べ物です', tabemono)).toBe(true);
   });
 
   it('rejects a different word', () => {
-    expect(isMatch(['食べる', 'たべる'], tabemono)).toBe(false);
+    expect(isMatch('たべる', tabemono)).toBe(false);
   });
 
   it('does not substring-match single-kana words', () => {
-    expect(isMatch(['はし'], { term: 'は', reading: 'は' })).toBe(false);
-    expect(isMatch(['は'], { term: 'は', reading: 'は' })).toBe(true);
+    expect(isMatch('はし', { term: 'は', reading: 'は' })).toBe(false);
+    expect(isMatch('は', { term: 'は', reading: 'は' })).toBe(true);
   });
 
   it('handles a missing reading', () => {
-    expect(isMatch(['すごい'], { term: 'すごい', reading: null })).toBe(true);
+    expect(isMatch('すごい', { term: 'すごい', reading: null })).toBe(true);
   });
 });
 
