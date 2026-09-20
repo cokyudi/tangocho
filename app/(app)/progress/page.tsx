@@ -68,15 +68,18 @@ export default async function ProgressPage() {
           {allLogs.length === 0 ? (
             <p className="py-6 text-center text-muted">No reviews yet — start practicing.</p>
           ) : (
-            <div className="flex h-32 items-end justify-between gap-1">
+            <div className="flex items-end justify-between gap-1">
               {days.map((d) => (
                 <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-                  <div className="flex w-full flex-1 items-end">
-                    <div
-                      className="w-full border-2 border-ink bg-accent"
-                      style={{ height: `${Math.max(d.count ? 8 : 0, (d.count / maxDay) * 100)}%` }}
-                      title={`${d.day}: ${d.count}`}
-                    />
+                  {/* h-24 is a definite height, so the bar's % height resolves. */}
+                  <div className="flex h-24 w-full items-end">
+                    {d.count > 0 && (
+                      <div
+                        className="w-full border-2 border-ink bg-accent"
+                        style={{ height: `${Math.max(8, (d.count / maxDay) * 100)}%` }}
+                        title={`${d.day}: ${d.count}`}
+                      />
+                    )}
                   </div>
                   <span className="text-[9px] text-muted">{d.label}</span>
                 </div>
