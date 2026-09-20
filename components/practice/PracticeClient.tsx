@@ -117,7 +117,7 @@ export default function PracticeClient({ words }: { words: PracticeWord[] }) {
             word={s.word}
             pending={s.pending}
             onRate={s.rate}
-            suggest={speaking && s.spoken?.matched === false ? 'forgot' : undefined}
+            suggest={speaking && s.spoken?.status === 'miss' ? 'forgot' : undefined}
           />
         ) : (
           <Button onClick={s.showAnswer} className="w-full">

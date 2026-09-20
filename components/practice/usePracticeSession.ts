@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { reviewWord } from '@/app/(app)/practice/actions';
 import { reviewSrs, type Rating } from '@/lib/srs';
-import { isMatch, lookupReading, normalize, speak } from '@/lib/speech';
+import { isKana, isMatch, lookupReading, normalize, speak } from '@/lib/speech';
 import type { PracticeWord } from '@/components/practice/PracticeClient';
 
 type QueueWord = PracticeWord & { relearn?: boolean };
 export type Mode = 'flip' | 'speak';
-export type Spoken = { heard: string; matched: boolean; note?: string };
+// `text` is what we show (kana when known); `note` keeps the recognized kanji.
+export type Spoken = { text: string; status: 'checking' | 'match' | 'miss'; note?: string };
 const MODE_KEY = 'practice-mode';
 
 export function usePracticeSession(words: PracticeWord[]) {
@@ -78,20 +79,32 @@ export function usePracticeSession(words: PracticeWord[]) {
     if (!word) return;
     const id = ++heardId.current;
     const heard = transcripts[0] ?? '';
-    if (isMatch(transcripts, word)) return setSpoken({ heard, matched: true });
-    setSpoken({ heard, matched: false });
+    const kanjiNote = (t: string) => (isKana(t) ? undefined : t);
+
+    if (isMatch(transcripts, word)) {
+      // Show the reading rather than the kanji it happened to pick.
+      const kana = isKana(heard) ? heard : (word.reading ?? heard);
+      return setSpoken({ text: kana, status: 'match', note: kanjiNote(heard) });
+    }
 
     // Homophone: recognition picked different kanji with the same reading
-    // (鑑賞 for 感傷). Said correctly, so accept it and say why.
+    // (鑑賞 for 感傷). Said correctly, so accept it. Stay in 'checking' until
+    // Jisho answers instead of flashing a ✗ that then turns into a ✓.
+    const candidates = transcripts.slice(0, 3).filter((t) => !isKana(t));
+    if (!candidates.length) return setSpoken({ text: heard, status: 'miss' });
+
+    setSpoken({ text: heard, status: 'checking' });
     const target = normalize(word.reading ?? word.term);
-    for (const t of transcripts.slice(0, 3)) {
+    let kana: string | null = null;
+    for (const t of candidates) {
       const reading = await lookupReading(t);
       if (heardId.current !== id) return;
       if (reading && normalize(reading) === target) {
-        setSpoken({ heard: t, matched: true, note: `same reading · ${reading}` });
-        return;
+        return setSpoken({ text: reading, status: 'match', note: t });
       }
+      kana ??= t === heard ? reading : null;
     }
+    setSpoken({ text: kana ?? heard, status: 'miss', note: kana ? kanjiNote(heard) : undefined });
   }
 
   return {

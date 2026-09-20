@@ -53,6 +53,8 @@ export function isMatch(transcripts: string[], word: { term: string; reading: st
   });
 }
 
+export const isKana = (s: string) => /^[\u3041-\u309f\u30a0-\u30ff\u30fc]+$/.test(normalize(s));
+
 // Reading of a heard term, via Jisho (server route). Cached per session;
 // null when unknown or the lookup fails.
 const readings = new Map<string, string | null>();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isMatch, normalize } from './speech';
+import { isKana, isMatch, normalize } from './speech';
 
 const tabemono = { term: '食べ物', reading: 'たべもの' };
 
@@ -37,5 +37,18 @@ describe('isMatch', () => {
 
   it('handles a missing reading', () => {
     expect(isMatch(['すごい'], { term: 'すごい', reading: null })).toBe(true);
+  });
+});
+
+describe('isKana', () => {
+  it('is true for hiragana, katakana and long vowels', () => {
+    expect(isKana('かんしょう')).toBe(true);
+    expect(isKana('タベモノ')).toBe(true);
+    expect(isKana('ラーメン')).toBe(true);
+  });
+
+  it('is false for kanji or mixed text', () => {
+    expect(isKana('鑑賞')).toBe(false);
+    expect(isKana('食べ物')).toBe(false);
   });
 });
