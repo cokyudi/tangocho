@@ -33,7 +33,11 @@ export async function lookupJisho(term: string): Promise<JishoEntry | null> {
   const url = `https://jisho.org/api/v1/search/words?keyword=${encodeURIComponent(term)}`;
   let json: JishoApiResponse;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    // Jisho 403s Node's default user agent, so identify the app explicitly.
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'tangocho/1.0 (+https://tangocho.yudidputra.com)' },
+      signal: AbortSignal.timeout(6000),
+    });
     if (!res.ok) return null;
     json = (await res.json()) as JishoApiResponse;
   } catch {
