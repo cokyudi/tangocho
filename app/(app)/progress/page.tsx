@@ -69,21 +69,38 @@ export default async function ProgressPage() {
             <p className="py-6 text-center text-muted">No reviews yet — start practicing.</p>
           ) : (
             <div className="flex items-end justify-between gap-1">
-              {days.map((d) => (
-                <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-                  {/* h-24 is a definite height, so the bar's % height resolves. */}
-                  <div className="flex h-24 w-full items-end">
-                    {d.count > 0 && (
-                      <div
-                        className="w-full border-2 border-ink bg-accent"
-                        style={{ height: `${Math.max(8, (d.count / maxDay) * 100)}%` }}
-                        title={`${d.day}: ${d.count}`}
-                      />
-                    )}
+              {days.map((d) => {
+                // h-24 is a definite height, so the bar's % height resolves.
+                const pct = d.count ? Math.max(8, (d.count / maxDay) * 100) : 0;
+                return (
+                  <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
+                    <div className="flex h-24 w-full flex-col justify-end">
+                      {d.count > 0 && (
+                        <>
+                          {/* Short bars can't hold the number, so it sits above. */}
+                          {pct < 25 && (
+                            <span className="text-center text-[10px] font-bold leading-none text-ink">
+                              {d.count}
+                            </span>
+                          )}
+                          <div
+                            className="flex w-full justify-center border-2 border-ink bg-accent pt-0.5"
+                            style={{ height: `${pct}%` }}
+                            title={`${d.day}: ${d.count}`}
+                          >
+                            {pct >= 25 && (
+                              <span className="text-[10px] font-bold leading-none text-on-accent">
+                                {d.count}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-muted">{d.label}</span>
                   </div>
-                  <span className="text-[9px] text-muted">{d.label}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </Card>
