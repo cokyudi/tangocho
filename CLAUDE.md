@@ -26,6 +26,7 @@ Full build spec: [`docs/SPEC.md`](docs/SPEC.md).
 ## Conventions
 
 - Folder layout mirrors the portfolio: `app/`, `components/ui/`, `lib/`, `constants/`. Path alias `@/*`.
+- Hooks: shared ones in `lib/hooks/`; feature hooks live beside their components (`components/practice/usePracticeSession.ts`). Move a hook to `lib/hooks/` only when a second feature imports it. No per-feature `hooks/` subfolder.
 - **Design system is copied from `../yudi-simple-portfolio`** — do not add a UI library. Reuse `components/ui/{Card,Button,Badge}.tsx`, `globals.css` tokens, retro shadows (`retro-sm/retro/retro-lg`, hard offset, no blur), `border-2 border-ink`, graph-paper grid, Space Grotesk + Geist + **Noto Sans JP**, `next-themes` dark mode.
 - **No AI-slop UI**: one consistent line-icon set (Lucide/Phosphor, single weight); no AI imagery, gradient blobs, emoji-branding, or stock illustrations. Restraint over flourish — the retro grid/shadow language carries personality.
 - RLS on every table (`user_id = auth.uid()`); email allowlist (`ALLOWED_EMAIL`) enforced in middleware; secrets server-only.
