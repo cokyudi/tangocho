@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Download } from 'lucide-react';
+import { Download, BookCheck } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/server';
@@ -91,7 +91,7 @@ export default async function ProgressPage() {
       </p>
 
       <section className="space-y-3 border-t-2 border-ink/15 pt-6">
-        <h2 className="font-display text-lg font-bold text-ink">Backup</h2>
+        <h2 className="font-display text-lg font-bold text-ink">Backup & data</h2>
         <Card className="flex items-center justify-between gap-3 p-4">
           <p className="text-sm text-muted">
             Download all words, sources & review history as JSON.
@@ -104,6 +104,18 @@ export default async function ProgressPage() {
             <Download className="h-4 w-4" />
             Export
           </a>
+        </Card>
+        <Card className="flex items-center justify-between gap-3 p-4">
+          <p className="text-sm text-muted">
+            Re-check saved words against Jisho (reading, part of speech, JLPT).
+          </p>
+          <Link
+            href="/recheck"
+            className="inline-flex shrink-0 items-center gap-1.5 border-2 border-ink bg-surface px-3 py-2 font-display text-sm font-bold text-ink shadow-retro-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <BookCheck className="h-4 w-4" />
+            Re-check
+          </Link>
         </Card>
       </section>
     </div>

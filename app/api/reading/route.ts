@@ -20,5 +20,9 @@ export async function GET(request: Request) {
   }
 
   const entry = await lookupJisho(term);
-  return NextResponse.json({ reading: entry?.reading ?? null });
+  return NextResponse.json({
+    reading: entry?.reading ?? null,
+    partOfSpeech: entry?.partOfSpeech ?? null,
+    jlpt: entry?.jlpt ?? null,
+  });
 }
