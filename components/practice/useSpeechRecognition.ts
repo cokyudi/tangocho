@@ -13,8 +13,19 @@ export function useSpeechRecognition(onResult: (transcripts: string[]) => void) 
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<Recognition | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => () => ref.current?.abort(), []);
+  const clearTimers = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
+
+  useEffect(() => {
+    return () => {
+      clearTimers();
+      ref.current?.abort();
+    };
+  }, []);
 
   function listen() {
     const r = createRecognition();
@@ -26,14 +37,22 @@ export function useSpeechRecognition(onResult: (transcripts: string[]) => void) 
     let latest: string[] | null = null;
     r.onresult = (e) => {
       latest = Array.from(e.results[0], (a) => a.transcript);
+      clearTimers();
+      // Close the mic as soon as we have the answer: on a final result, or
+      // after a beat of silence (Safari never finalizes on its own).
+      if (e.results[0].isFinal) r.stop();
+      else timers.current.push(setTimeout(() => r.stop(), 1200));
     };
     r.onerror = (e) => setError(ERRORS[e.error] ?? `Speech recognition error: ${e.error}`);
     r.onend = () => {
+      clearTimers();
       setListening(false);
       if (latest) onResult(latest);
     };
     setListening(true);
     r.start();
+    // Safety net: never leave the mic open if nothing is recognized at all.
+    timers.current.push(setTimeout(() => r.stop(), 10_000));
   }
 
   return { listening, error, listen, stop: () => ref.current?.stop() };

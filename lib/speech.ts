@@ -5,7 +5,9 @@ export type Recognition = {
   lang: string;
   maxAlternatives: number;
   interimResults: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult:
+    | ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void)
+    | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
   start: () => void;
