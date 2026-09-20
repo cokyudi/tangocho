@@ -13,7 +13,7 @@ export default function SpokenResult({ spoken }: { spoken: Spoken }) {
     <p className="inline-flex items-center gap-1.5 text-muted">
       Heard <span className="font-jp text-base text-ink">{spoken.text || '—'}</span>
       {ICONS[spoken.status]}
-      {spoken.note && <span className="font-jp text-xs">{spoken.note}</span>}
+      {spoken.note && <span className="text-xs">{spoken.note}</span>}
     </p>
   );
 }

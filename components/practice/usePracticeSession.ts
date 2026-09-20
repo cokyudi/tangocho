@@ -6,7 +6,8 @@ import type { PracticeWord } from '@/components/practice/PracticeClient';
 
 type QueueWord = PracticeWord & { relearn?: boolean };
 export type Mode = 'flip' | 'speak';
-// `text` is what we show (kana when known); `note` keeps the recognized kanji.
+// `text` is what we show (kana when known); `note` explains a match, or keeps
+// the recognized kanji on a miss.
 export type Spoken = { text: string; status: 'checking' | 'match' | 'miss'; note?: string };
 const MODE_KEY = 'practice-mode';
 
@@ -84,7 +85,7 @@ export function usePracticeSession(words: PracticeWord[]) {
     if (isMatch(transcripts, word)) {
       // Show the reading rather than the kanji it happened to pick.
       const kana = isKana(heard) ? heard : (word.reading ?? heard);
-      return setSpoken({ text: kana, status: 'match', note: kanjiNote(heard) });
+      return setSpoken({ text: kana, status: 'match' });
     }
 
     // Homophone: recognition picked different kanji with the same reading
@@ -100,7 +101,8 @@ export function usePracticeSession(words: PracticeWord[]) {
       const reading = await lookupReading(t);
       if (heardId.current !== id) return;
       if (reading && normalize(reading) === target) {
-        return setSpoken({ text: reading, status: 'match', note: t });
+        // Don't show the recognized kanji (鑑賞): it isn't this card's word.
+        return setSpoken({ text: reading, status: 'match', note: 'same reading' });
       }
       kana ??= t === heard ? reading : null;
     }
