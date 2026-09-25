@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge';
 import ThemeSwitch from '@/components/ThemeSwitch';
 import Reveal from '@/components/about/Reveal';
 import AboutHero from '@/components/about/AboutHero';
+import AboutStory from '@/components/about/AboutStory';
 import SourceMarquee from '@/components/about/SourceMarquee';
 import ScreenshotCarousel from '@/components/about/ScreenshotCarousel';
 import { useAboutLanguage } from '@/components/about/useAboutLanguage';
@@ -52,6 +53,11 @@ export default function AboutContent() {
         {/* Hero */}
         <Reveal>
           <AboutHero t={t.hero} />
+        </Reveal>
+
+        {/* Story: the paper notebook it replaces */}
+        <Reveal>
+          <AboutStory t={t.story} />
         </Reveal>
 
         {/* Source marquee */}

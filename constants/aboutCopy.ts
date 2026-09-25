@@ -22,6 +22,25 @@ const en = {
     { title: 'Practice', jp: '復習', body: 'SM-2 spaced-repetition flashcards. Flip, rate forgot / hard / easy, and the app schedules the next review.' },
     { title: 'Speak', jp: '話す', body: 'See the meaning, say the word out loud. Speech recognition checks what it heard against the word, then plays the correct pronunciation so you can compare.' },
   ],
+  story: {
+    heading: 'Why I built it',
+    alts: [
+      'Handwritten notebook page: Japanese words with furigana, each followed by an arrow and an English meaning',
+      'Handwritten notebook page: Japanese words with furigana and mixed English / Indonesian meanings',
+    ],
+    body: [
+      'This is how I used to learn: every new word from anime, manga, or daily life in Japan went into a paper notebook — kanji, furigana on top, an arrow, then whatever meaning came to mind, half English, half Indonesian.',
+      'It didn’t hold up. Every reading took a lookup, I forgot where I’d heard each word, and the pages never quizzed me — so I rarely flipped back.',
+      'tangocho keeps the notebook habit and does the slow parts: it fills in the reading and meanings, remembers the source, and tells me which words to review today.',
+    ],
+    sample: {
+      label: 'The same word in tangocho',
+      source: 'Anime',
+      en: 'foreshadowing',
+      id: 'petunjuk awal; memberi tanda',
+      example: '最初[さいしょ]の場面[ばめん]は結末[けつまつ]への伏線[ふくせん]だった。',
+    },
+  },
   seeIt: 'See it in action',
   shots: {
     capture: { alt: 'Capture screen auto-filling a word', caption: 'Capture · AI auto-fill' },
@@ -74,6 +93,25 @@ const ja: AboutCopy = {
     { title: 'Practice', jp: '復習', body: 'SM-2の間隔反復フラッシュカード。めくって「忘れた／難しい／簡単」で評価すると、次の復習日が自動で決まる。' },
     { title: 'Speak', jp: '話す', body: '意味を見て、単語を声に出して言う。音声認識が聞き取った内容を答えと照合し、正しい発音を再生して聞き比べられる。' },
   ],
+  story: {
+    heading: '作ったきっかけ',
+    alts: [
+      '手書きのノート：ふりがな付きの日本語の単語と、矢印の先に英語の意味',
+      '手書きのノート：ふりがな付きの日本語の単語と、英語・インドネシア語が混ざった意味',
+    ],
+    body: [
+      '以前はこうやって覚えていた。アニメや漫画、日本での生活で出会った新しい単語を、紙のノートに書く。漢字、上にふりがな、矢印、そして思いついた意味を英語とインドネシア語で。',
+      'でも続かなかった。読みを毎回調べるのは手間で、どこで聞いた単語かも忘れ、ノートはテストしてくれない。だから見返すこともほとんどなかった。',
+      'tangochoはノートの習慣はそのままに、面倒な部分を代わりにやってくれる。読みと意味を自動で入力し、出典を記録し、今日復習すべき単語を教えてくれる。',
+    ],
+    sample: {
+      label: 'tangochoでは同じ単語がこうなる',
+      source: 'アニメ',
+      en: 'foreshadowing',
+      id: 'petunjuk awal; memberi tanda',
+      example: '最初[さいしょ]の場面[ばめん]は結末[けつまつ]への伏線[ふくせん]だった。',
+    },
+  },
   seeIt: '実際の画面',
   shots: {
     capture: { alt: '単語を自動入力している取り込み画面', caption: 'Capture · AIで自動入力' },
