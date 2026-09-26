@@ -35,7 +35,7 @@ export default function AboutStory({ t }: { t: AboutCopy['story'] }) {
             <p key={para}>{para}</p>
           ))}
         </Card>
-        <Card className="space-y-3 self-start p-5">
+        <Card className="flex flex-col gap-3 p-5">
           <p className="font-display text-xs font-bold uppercase tracking-wide text-muted">{s.label}</p>
           <div className="flex items-end justify-between gap-2">
             <Furigana term="伏線" reading="ふくせん" className="text-3xl font-bold text-ink" />
@@ -47,7 +47,7 @@ export default function AboutStory({ t }: { t: AboutCopy['story'] }) {
             <dt className="font-display font-bold text-accent">ID</dt>
             <dd className="text-fg">{s.id}</dd>
           </dl>
-          <FuriganaText text={s.example} className="block border-t-2 border-ink/15 pt-3 text-sm text-fg" />
+          <FuriganaText text={s.example} className="mt-auto block border-t-2 border-ink/15 pt-3 text-sm text-fg" />
         </Card>
       </div>
     </section>
