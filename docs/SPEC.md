@@ -208,6 +208,8 @@ daily_suggestions
 
 **Later:** Phase 6 push can carry today's words ("田中: 「…」") once the cron exists.
 
+**Idea — RAG for related picks (not needed yet, noted 2026-09-26):** today the prompt is plain context stuffing (friends, 30 recent words, every seen term, last 20 reactions); Jisho validates after. Real RAG would embed `words` (Supabase pgvector, free tier) and retrieve the saved words most related to each friend's themes, so picks build on known vocab by meaning (会議, 資料 → 議事録). Add when suggestions feel random/unconnected, or when the seen-term list gets large (~2k+ words); at that size first drop the "never pick" list from the prompt, since dedupe is already enforced in code.
+
 - **Verify:** add a friend + a coworker → Home shows 4 words with lines in the right register; save 2 → they appear in Browse under the friend's source; mark 1 Known → not in Browse, not suggested again; reload → no regeneration; next day → new set, none duplicated.
 
 ---
