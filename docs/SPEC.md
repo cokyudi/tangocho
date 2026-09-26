@@ -203,12 +203,12 @@ daily_suggestions
 
 **Home card "Today's words":** each item shows the friend's name + line (furigana, tap to reveal EN), a checkbox, and a **Known** button.
 - **Save selected** → copy the suggestion row into `words` (friend's source; friend's line → `example_jp`/`example_furigana`, its Indonesian → `example_translation`); status `saved`, `word_id` set. The daily Gemini call already returns every field (Jisho overrides reading/EN/POS/JLPT), so saving costs no extra AI requests — re-enriching 4 words would hit the 5 req/min free tier.
-- **Known** → save as mastered: `repetitions = 1, interval = 180, due_date = today + 180` (`masteryLevel` → mastered); status `known`.
+- **Known** → status `known` only; not added to `words` (no practice needed). The status still steers future picks, and past suggestions are never re-suggested.
 - **Not today** / leaving items unchecked after saving → status `skipped` (feeds the next prompt).
 
 **Later:** Phase 6 push can carry today's words ("田中: 「…」") once the cron exists.
 
-- **Verify:** add a friend + a coworker → Home shows 4 words with lines in the right register; save 2 → they appear in Browse under the friend's source; mark 1 Known → shows Mastered; reload → no regeneration; next day → new set, none duplicated.
+- **Verify:** add a friend + a coworker → Home shows 4 words with lines in the right register; save 2 → they appear in Browse under the friend's source; mark 1 Known → not in Browse, not suggested again; reload → no regeneration; next day → new set, none duplicated.
 
 ---
 
