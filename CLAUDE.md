@@ -46,3 +46,4 @@ Dependency-ordered, each sized for one Claude Pro 5-hour window, ends with commi
 4. Practice (SM-2 engine + flashcards + due badge) — MVP complete
 5. PWA + progress dashboard + a11y/perf polish
 6. (Optional) Push reminders (iOS 26+, Vercel cron)
+7. Daily words from AI friends (friends page + 4 suggestions/day on Home)

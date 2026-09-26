@@ -166,6 +166,50 @@ review_logs   -- for progress stats & history
 - Vercel cron (`vercel.ts` crons) → daily function: if due>0, send "N words due" push.
 - **Verify:** receive a real push on iPhone at scheduled time.
 
+### Phase 7 — Daily words from AI friends (designed 2026-09-26)
+- **Problem:** new words aren't added every day. **Goal:** both more words *and* words I'll actually hear.
+- **Idea:** user-defined AI "friends" (characters) each mention a word in a one-line message, in their own speech level and themes. 4 words/day; pick any (or none) to save.
+
+**Schema** (migration + RLS `user_id = auth.uid()` on both):
+```sql
+friends
+  id, user_id, created_at
+  source_id     uuid not null → sources.id   -- a 'person' source created with the friend
+  name          text not null
+  relationship  text check in ('friend','coworker')   -- friend = casual (タメ口), coworker = polite/business
+  themes        text[] not null default '{}'  -- e.g. {IT, meetings, ramen}
+  persona       text                          -- free text: "30s engineer, dry humour, loves camping"
+  active        bool not null default true    -- pause without deleting
+
+daily_suggestions
+  id, user_id, created_at
+  date          date not null                 -- Asia/Tokyo
+  friend_id     → friends.id on delete cascade
+  term, reading text
+  line_ja       text                          -- friend's line, 漢字[かな] furigana convention
+  line_en       text
+  status        text check in ('pending','saved','known','skipped') default 'pending'
+  word_id       → words.id on delete set null
+  unique (user_id, date, term)
+```
+
+**Friends page** (`/friends`, linked from Home/nav): list, add, edit, pause. Creating a friend also creates its `person` source, so saved words are tagged with that friend and Browse's source filter + stats work unchanged.
+
+**Daily generation** (lazy, on first Home load of the Tokyo day; no cron):
+- If no rows for today and ≥1 active friend → one Gemini `generateObject` call returning exactly 4 items.
+- Mix: 3 words from 2–3 rotating active friends (their themes + register) and 1 seasonal / vocab-gap word (date-driven: 梅雨, お盆, 忘年会…; no news grounding for now).
+- Prompt context: friends' profiles, today's date/season, ~30 recent `words` terms (build on them: shared kanji/theme), last ~20 suggestion statuses (skipped/known = "don't pick like this").
+- Guards: validate each term via Jisho (existing `lib/jisho.ts`), drop hallucinations unless clearly slang; drop terms already in `words`. If fewer than 4 survive, keep what's left (no retry loop).
+
+**Home card "Today's words":** each item shows the friend's name + line (furigana, tap to reveal EN), a checkbox, and a **Known** button.
+- **Save selected** → batch-save via the enrich pipeline (friend's source; friend's line becomes `example_jp`); status `saved`, `word_id` set.
+- **Known** → save as mastered: `repetitions = 1, interval = 180, due_date = today + 180` (`masteryLevel` → mastered); status `known`.
+- **Not today** / leaving items unchecked after saving → status `skipped` (feeds the next prompt).
+
+**Later:** Phase 6 push can carry today's words ("田中: 「…」") once the cron exists.
+
+- **Verify:** add a friend + a coworker → Home shows 4 words with lines in the right register; save 2 → they appear in Browse under the friend's source; mark 1 Known → shows Mastered; reload → no regeneration; next day → new set, none duplicated.
+
 ---
 
 ## Autonomous workflow (tooling)
