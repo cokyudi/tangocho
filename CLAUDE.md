@@ -31,6 +31,7 @@ Full build spec: [`docs/SPEC.md`](docs/SPEC.md).
 - **No AI-slop UI**: one consistent line-icon set (Lucide/Phosphor, single weight); no AI imagery, gradient blobs, emoji-branding, or stock illustrations. Restraint over flourish — the retro grid/shadow language carries personality.
 - RLS on every table (`user_id = auth.uid()`); email allowlist (`ALLOWED_EMAIL`) enforced in middleware; secrets server-only.
 - Prefer editing existing files; don't add abstractions, error handling, or comments beyond the task.
+- Shipping a user-visible feature? Add an entry (newest first, EN + JA) to `constants/changelog.ts` — it feeds the "What's new" section on `/about` and the public `/changelog` page. Not for fixes or refactors.
 
 ## Env vars
 
