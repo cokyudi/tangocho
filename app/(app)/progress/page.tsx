@@ -4,21 +4,33 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { createClient } from '@/lib/supabase/server';
 import { MASTERY_LABELS, MASTERY_LEVELS } from '@/lib/mastery';
-import { computeProgress } from '@/lib/progress';
+import { computeProgress, tokyoDay } from '@/lib/progress';
 
 export const metadata = { title: 'Progress' };
 
 export default async function ProgressPage() {
   const supabase = await createClient();
-  const [{ data: words }, { data: logs }] = await Promise.all([
+  const monthAgo = new Date();
+  monthAgo.setDate(monthAgo.getDate() - 29);
+  const since = tokyoDay(monthAgo);
+  const [{ data: words }, { data: logs }, { data: suggestions }] = await Promise.all([
     supabase.from('words').select('repetitions, interval'),
     supabase.from('review_logs').select('reviewed_at').order('reviewed_at', { ascending: false }),
+    supabase.from('daily_suggestions').select('status').gte('date', since).neq('status', 'pending'),
   ]);
 
   const allWords = words ?? [];
   const allLogs = logs ?? [];
 
   const { dist, maxDist, days, maxDay, streak } = computeProgress(allWords, allLogs);
+
+  // Friend words, last 30 days. Mostly skipped = picks miss the mark (a RAG trigger, see SPEC).
+  const decided = suggestions ?? [];
+  const friendStats = (['saved', 'known', 'skipped'] as const).map((status) => ({
+    label: status[0].toUpperCase() + status.slice(1),
+    value: decided.filter((s) => s.status === status).length,
+  }));
+  const saveRate = decided.length ? Math.round((friendStats[0].value / decided.length) * 100) : null;
 
   const stats = [
     { label: 'Words', value: allWords.length },
@@ -102,6 +114,34 @@ export default async function ProgressPage() {
                 );
               })}
             </div>
+          )}
+        </Card>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-lg font-bold text-ink">Friend words · 30 days</h2>
+          <Link href="/friends" className="font-display text-sm font-bold text-accent">
+            Friends →
+          </Link>
+        </div>
+        <Card className="space-y-3 p-4">
+          {decided.length === 0 ? (
+            <p className="py-2 text-center text-muted">No friend words decided yet.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {friendStats.map((s) => (
+                  <div key={s.label}>
+                    <span className="block font-display text-2xl font-bold text-ink">{s.value}</span>
+                    <span className="text-xs text-muted">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="border-t-2 border-ink/15 pt-3 text-center text-sm text-muted">
+                Save rate <span className="font-display font-bold text-ink">{saveRate}%</span>
+              </p>
+            </>
           )}
         </Card>
       </section>
