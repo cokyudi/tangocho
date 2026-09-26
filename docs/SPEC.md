@@ -139,6 +139,11 @@ review_logs   -- for progress stats & history
 - Row/card actions: edit (reuse capture form), delete (confirm).
 - **Deliverable:** browse, filter, edit, delete. **Verify:** filters narrow correctly; edit persists; due-only matches `due_date <= today`.
 
+**Idea — long lists / virtual scroll (not needed yet, noted 2026-09-26):** Browse renders every word (45 today); the other lists are small by design (4 daily words, a few friends, changelog, recheck diffs only). Virtual scroll costs ⌘F find, stable scroll position and screen-reader access, so escalate in order:
+- **Trigger 1 — ~1,000+ words or visible jank scrolling Browse on the phone:** add `content-visibility: auto` + `contain-intrinsic-size` to each row/card (one CSS line; rows stay in the DOM, so find/links/a11y keep working).
+- **Trigger 2 — still janky after that, ~3,000+ words:** real virtualization with `@tanstack/react-virtual` (and consider paginating the server fetch).
+- **Not triggers:** slow first load (that's the fetch — paginate or select fewer columns) or a long changelog (group old years instead).
+
 ### Phase 4 — Practice (SM-2)
 - `lib/srs.ts` pure SM-2 function + unit tests (use the repo's test runner, e.g. vitest).
 - Practice queue = words due today (`due_date <= today` OR never reviewed), ordered.
