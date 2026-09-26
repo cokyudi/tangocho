@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import ThemeSwitch from '@/components/ThemeSwitch';
 import Reveal from '@/components/about/Reveal';
+import AboutHeader from '@/components/about/AboutHeader';
+import ChangelogList from '@/components/about/ChangelogList';
+import { changelog } from '@/constants/changelog';
 import AboutHero from '@/components/about/AboutHero';
 import AboutStory from '@/components/about/AboutStory';
 import SourceMarquee from '@/components/about/SourceMarquee';
@@ -29,27 +31,12 @@ const stack = [
 ];
 
 export default function AboutContent() {
-  const { t, toggleLanguage } = useAboutLanguage();
+  const { language, t, toggleLanguage } = useAboutLanguage();
   const shots = SHOT_ORDER.map((id) => ({ src: `/screenshots/${id}.png`, ...t.shots[id] }));
 
   return (
     <div className="min-h-screen">
-      <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4">
-        <span className="font-display text-xl font-bold text-ink">
-          tangocho<span className="ml-1 text-accent">単語帳</span>
-        </span>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            aria-label={t.toggle.aria}
-            className="inline-flex h-11 min-w-11 items-center justify-center border-2 border-ink bg-surface px-2 font-display text-sm font-bold text-fg shadow-retro-sm transition-transform duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:text-accent active:translate-x-0.5 active:translate-y-0.5 active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          >
-            {t.toggle.label}
-          </button>
-          <ThemeSwitch />
-        </div>
-      </header>
+      <AboutHeader toggle={t.toggle} onToggle={toggleLanguage} />
 
       <main className="mx-auto w-full max-w-3xl space-y-14 px-4 pb-16 pt-6">
         {/* Hero */}
@@ -86,6 +73,26 @@ export default function AboutContent() {
           <section className="space-y-5">
             <h2 className="font-display text-2xl font-bold text-ink">{t.seeIt}</h2>
             <ScreenshotCarousel shots={shots} labels={t.carousel} />
+          </section>
+        </Reveal>
+
+        {/* What's new: latest few; the full list lives on /changelog */}
+        <Reveal>
+          <section className="space-y-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="font-display text-2xl font-bold text-ink">
+                {t.changelog.heading} <span className="font-jp text-base text-accent">{t.changelog.jp}</span>
+              </h2>
+              <Link
+                href={language === 'ja' ? '/changelog?lang=ja' : '/changelog'}
+                className="shrink-0 font-display text-sm font-bold text-accent"
+              >
+                {t.changelog.seeAll}
+              </Link>
+            </div>
+            <Card className="p-5">
+              <ChangelogList entries={changelog.slice(0, 3)} language={language} readPost={t.changelog.readPost} />
+            </Card>
           </section>
         </Reveal>
 

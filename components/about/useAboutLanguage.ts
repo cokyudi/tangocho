@@ -31,5 +31,5 @@ export function useAboutLanguage() {
     localStorage.setItem(KEY, next);
   };
 
-  return { t: aboutCopy[language], toggleLanguage };
+  return { language, t: aboutCopy[language], toggleLanguage };
 }

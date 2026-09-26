@@ -59,6 +59,15 @@ const en = {
     next: 'Next screen',
     goTo: (n: number) => `Go to screen ${n}`,
   },
+  changelog: {
+    heading: 'What’s new',
+    jp: '更新履歴',
+    seeAll: 'See all updates →',
+    readPost: 'Read the story ↗',
+    pageTitle: 'Updates',
+    pageIntro: 'Every feature added to tangocho, newest first.',
+    back: '← Back to the tour',
+  },
   builtHeading: 'How it’s built',
   built: [
     'A full-stack PWA on entirely free tiers. Words are auto-enriched by a ',
@@ -136,6 +145,15 @@ const ja: AboutCopy = {
     prev: '前の画面',
     next: '次の画面',
     goTo: (n: number) => `画面${n}へ`,
+  },
+  changelog: {
+    heading: 'What’s new',
+    jp: '更新履歴',
+    seeAll: 'すべての更新を見る →',
+    readPost: '記事を読む ↗',
+    pageTitle: '更新履歴',
+    pageIntro: 'tangochoに追加した機能の一覧（新しい順）。',
+    back: '← 紹介ページに戻る',
   },
   builtHeading: '技術構成',
   built: [

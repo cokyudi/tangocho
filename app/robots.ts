@@ -13,6 +13,8 @@ const disallow = [
   '/capture',
   '/practice',
   '/progress',
+  '/friends',
+  '/recheck',
   '/login',
   '/denied',
   '/offline',
