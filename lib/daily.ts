@@ -1,11 +1,14 @@
 import { generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { z } from 'zod';
-import type { createClient } from './supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from './database.types';
 import { lookupJisho, type JishoEntry } from './jisho';
 import { tokyoDay } from './progress';
 
-type Supabase = Awaited<ReturnType<typeof createClient>>;
+// Explicit user_id filters throughout: the cron passes a service-role client,
+// which bypasses RLS.
+type Supabase = SupabaseClient<Database>;
 
 const MODEL = 'gemini-2.5-flash';
 const DAILY_COUNT = 4;
@@ -91,13 +94,18 @@ async function generate(supabase: Supabase, userId: string, date: string) {
   const { data: activeFriends } = await supabase
     .from('friends')
     .select('id, name, relationship, themes, persona')
+    .eq('user_id', userId)
     .eq('active', true);
   if (!activeFriends?.length) return [];
   const friends = shuffle(activeFriends).slice(0, 3);
 
   const [{ data: words }, { data: past }] = await Promise.all([
-    supabase.from('words').select('term').order('created_at', { ascending: false }),
-    supabase.from('daily_suggestions').select('term, status').order('created_at', { ascending: false }),
+    supabase.from('words').select('term').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase
+      .from('daily_suggestions')
+      .select('term, status')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false }),
   ]);
   const seen = new Set([...(words ?? []), ...(past ?? [])].map((w) => w.term));
   const recent = (words ?? []).slice(0, 30).map((w) => w.term);
@@ -175,6 +183,7 @@ export async function getTodaysSuggestions(supabase: Supabase, userId: string) {
   const { data } = await supabase
     .from('daily_suggestions')
     .select(SELECT)
+    .eq('user_id', userId)
     .eq('date', date)
     .order('created_at');
   if (data?.length) return data;

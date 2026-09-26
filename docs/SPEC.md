@@ -160,11 +160,14 @@ review_logs   -- for progress stats & history
 - Practice **Flip | Speak** toggle (persisted in `localStorage`). Speak card shows the ID/EN meaning → mic → Web Speech API (`ja-JP`, 5 alternatives) → "Heard X ✓/✗" via `lib/speech.ts#isMatch` (term or reading, katakana≈hiragana). User still rates; a miss only highlights Forgot. Shares SM-2 state with Flip.
 - Support (tested 2026-09): Chrome ✓, iOS home-screen PWA ✓, iOS Safari ✓, macOS Safari ✓ (needs manual Stop: it never finalizes, so interim results are kept and flushed on stop). Safari needs Dictation on (+ Japanese dictation language downloaded on macOS), else `service-not-allowed` → Speak card shows a Settings hint; "Show answer" still works. Gemini audio fallback deferred until needed.
 
-### Phase 6 — (Optional) Push reminders
-- iOS 26+ supports web push for installed PWAs, so this is fully viable on the user's phone.
-- web-push subscription + service-worker push handler; store subscription in DB.
-- Vercel cron (`vercel.ts` crons) → daily function: if due>0, send "N words due" push.
-- **Verify:** receive a real push on iPhone at scheduled time.
+### Phase 6 — Push reminders + daily cron (done 2026-09-26)
+- iOS 26+ supports web push for installed PWAs (Safari tab can't subscribe — the Friends page says so).
+- `push_subscriptions` (endpoint unique, p256dh, auth; RLS owner-only). `web-push` sends; VAPID keys in env. Dead subscriptions (404/410) are deleted on send.
+- Friends page toggle: turn on/off + "Send a test notification". Re-saves the browser's subscription on every visit (heals a subscribe the server never got); subscribe times out after 20s.
+- `vercel.json` cron `0 22 * * *` (07:00 JST; Hobby = once/day, may fire late within the hour) → `/api/cron/daily`, guarded by `CRON_SECRET` (and public in the proxy). Uses a service-role client (`SUPABASE_SECRET_KEY`, server-only), so `lib/daily.ts` filters by `user_id` explicitly. Pre-generates today's friend words (Home opens instantly), then one push: first friend line as title, "N new words · M due" as body; nothing sent when both are 0.
+- `sw.js` v3: push + notificationclick (focus/open `/`); no static caching on localhost (dev chunk names aren't hashed → stale code).
+- Env: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `SUPABASE_SECRET_KEY`.
+- **Verify:** test notification arrives; manual cron call sends the daily push; real push on iPhone at 07:00.
 
 ### Phase 7 — Daily words from AI friends (designed 2026-09-26)
 - **Problem:** new words aren't added every day. **Goal:** both more words *and* words I'll actually hear.
@@ -207,7 +210,7 @@ daily_suggestions
 - **Known** → status `known` only; not added to `words` (no practice needed). The status still steers future picks, and past suggestions are never re-suggested.
 - **Not today** / leaving items unchecked after saving → status `skipped` (feeds the next prompt).
 
-**Later:** Phase 6 push can carry today's words ("田中: 「…」") once the cron exists.
+**Push:** the Phase 6 cron pre-generates the set at 07:00 and sends the first friend line as a notification.
 
 **Idea — RAG for related picks (not needed yet, noted 2026-09-26):** today the prompt is plain context stuffing (friends, 30 recent words, every seen term, last 20 reactions); Jisho validates after. Real RAG would embed `words` (Supabase pgvector, free tier) and retrieve the saved words most related to each friend's themes, so picks build on known vocab by meaning (会議, 資料 → 議事録). No need to start early: embeddings are derived from `words` and can be backfilled any time; the learning signal (saved words + source, suggestion statuses, `review_logs`) is already recorded — so never delete `daily_suggestions` rows (to free a day for testing, move them to another date).
 - **Triggers (any one):**

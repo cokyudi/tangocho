@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isAllowedEmail } from '@/lib/auth';
 
 // Paths reachable without an authenticated, allowlisted session.
-const PUBLIC_PATHS = ['/login', '/denied', '/auth', '/offline', '/about'];
+// /api/cron authenticates itself with CRON_SECRET.
+const PUBLIC_PATHS = ['/login', '/denied', '/auth', '/offline', '/about', '/api/cron'];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

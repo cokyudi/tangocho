@@ -34,7 +34,7 @@ Full build spec: [`docs/SPEC.md`](docs/SPEC.md).
 
 ## Env vars
 
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ALLOWED_EMAIL`, `GOOGLE_GENERATIVE_AI_API_KEY`. Manage via `vercel env`.
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ALLOWED_EMAIL`, `GOOGLE_GENERATIVE_AI_API_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `SUPABASE_SECRET_KEY` (service role, server-only — cron). Manage via `vercel env`.
 
 ## Build phases
 
@@ -45,5 +45,5 @@ Dependency-ordered, each sized for one Claude Pro 5-hour window, ends with commi
 3. Browse (table + bento grid, filters, edit/delete)
 4. Practice (SM-2 engine + flashcards + due badge) — MVP complete
 5. PWA + progress dashboard + a11y/perf polish
-6. (Optional) Push reminders (iOS 26+, Vercel cron)
+6. Push reminders + daily cron (07:00 JST, pre-generates friend words)
 7. Daily words from AI friends (friends page + 4 suggestions/day on Home)

@@ -1,6 +1,6 @@
 // Minimal service worker: cache-first for static assets, network-first for
 // navigations with an offline fallback. Enough for an installable PWA shell.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const STATIC_CACHE = `tangocho-static-${VERSION}`;
 const OFFLINE_URL = '/offline';
 
@@ -35,7 +35,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static build assets: cache-first.
+  // Static build assets: cache-first. Not on localhost: dev chunk names aren't
+  // content-hashed, so caching them would serve stale code.
+  if (self.location.hostname === 'localhost') return;
   if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icons/')) {
     event.respondWith(
       caches.open(STATIC_CACHE).then(async (cache) => {
@@ -47,4 +49,29 @@ self.addEventListener('fetch', (event) => {
       }),
     );
   }
+});
+
+// Daily push from /api/cron/daily: { title, body, url }.
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'tangocho', {
+      body: data.body,
+      icon: '/icons/icon-192.png',
+      data: { url: data.url || '/' },
+    }),
+  );
+});
+
+// Focus an open tangocho window if there is one, else open the app.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((w) => new URL(w.url).origin === self.location.origin);
+      if (open) return open.navigate(url).then((w) => (w || open).focus());
+      return self.clients.openWindow(url);
+    }),
+  );
 });

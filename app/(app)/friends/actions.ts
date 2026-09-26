@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { isAllowedEmail } from '@/lib/auth';
+import { sendPush } from '@/lib/push';
 
 export type Relationship = 'friend' | 'coworker';
 
@@ -79,4 +80,42 @@ export async function setFriendActive(id: string, active: boolean): Promise<Resu
 
   revalidatePath('/friends');
   return { ok: true };
+}
+
+export type PushSubscriptionInput = { endpoint: string; keys: { p256dh: string; auth: string } };
+
+export async function savePushSubscription(sub: PushSubscriptionInput): Promise<Result> {
+  const ctx = await authed();
+  if (!ctx) return { ok: false, error: 'Unauthorized' };
+  // The server POSTs to this URL later, so only accept real push-service endpoints.
+  if (!sub.endpoint.startsWith('https://')) return { ok: false, error: 'Invalid subscription' };
+
+  const { error } = await ctx.supabase.from('push_subscriptions').upsert(
+    { user_id: ctx.user.id, endpoint: sub.endpoint, p256dh: sub.keys.p256dh, auth: sub.keys.auth },
+    { onConflict: 'endpoint' },
+  );
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+export async function removePushSubscription(endpoint: string): Promise<Result> {
+  const ctx = await authed();
+  if (!ctx) return { ok: false, error: 'Unauthorized' };
+
+  const { error } = await ctx.supabase.from('push_subscriptions').delete().eq('endpoint', endpoint);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+// Lets me check a device right away instead of waiting for the 07:00 cron.
+export async function sendTestPush(): Promise<Result> {
+  const ctx = await authed();
+  if (!ctx) return { ok: false, error: 'Unauthorized' };
+
+  const { data: subs } = await ctx.supabase.from('push_subscriptions').select('endpoint, p256dh, auth');
+  if (!subs?.length) return { ok: false, error: 'No device has notifications on' };
+  const sent = await sendPush(ctx.supabase, subs, {
+    title: 'tangocho',
+    body: 'Notifications are on. Friend words arrive at 07:00.',
+    url: '/friends',
+  });
+  return sent ? { ok: true } : { ok: false, error: 'Push failed — check the server log' };
 }

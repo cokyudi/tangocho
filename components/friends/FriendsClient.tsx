@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import FriendForm from '@/components/friends/FriendForm';
+import PushToggle from '@/components/friends/PushToggle';
 import { setFriendActive } from '@/app/(app)/friends/actions';
 import type { Friend } from '@/components/friends/useFriendForm';
 
@@ -25,6 +26,8 @@ export default function FriendsClient({ friends }: { friends: Friend[] }) {
           coworkers politely.
         </p>
       </section>
+
+      <PushToggle />
 
       {editing ? (
         <FriendForm
