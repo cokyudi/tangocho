@@ -202,7 +202,7 @@ daily_suggestions
 - Guards: validate each term via Jisho (existing `lib/jisho.ts`), drop hallucinations unless clearly slang; drop terms already in `words`. If fewer than 4 survive, keep what's left (no retry loop).
 
 **Home card "Today's words":** each item shows the friend's name + line (furigana, tap to reveal EN), a checkbox, and a **Known** button.
-- **Save selected** → batch-save via the enrich pipeline (friend's source; friend's line becomes `example_jp`); status `saved`, `word_id` set.
+- **Save selected** → copy the suggestion row into `words` (friend's source; friend's line → `example_jp`/`example_furigana`, its Indonesian → `example_translation`); status `saved`, `word_id` set. The daily Gemini call already returns every field (Jisho overrides reading/EN/POS/JLPT), so saving costs no extra AI requests — re-enriching 4 words would hit the 5 req/min free tier.
 - **Known** → save as mastered: `repetitions = 1, interval = 180, due_date = today + 180` (`masteryLevel` → mastered); status `known`.
 - **Not today** / leaving items unchecked after saving → status `skipped` (feeds the next prompt).
 

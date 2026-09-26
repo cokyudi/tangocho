@@ -14,6 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_suggestions: {
+        Row: {
+          created_at: string
+          date: string
+          friend_id: string
+          id: string
+          jlpt: string | null
+          line_en: string | null
+          line_furigana: string | null
+          line_id: string | null
+          line_ja: string
+          meaning_en: string | null
+          meaning_id: string | null
+          part_of_speech: string | null
+          reading: string | null
+          status: string
+          term: string
+          user_id: string
+          word_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          friend_id: string
+          id?: string
+          jlpt?: string | null
+          line_en?: string | null
+          line_furigana?: string | null
+          line_id?: string | null
+          line_ja: string
+          meaning_en?: string | null
+          meaning_id?: string | null
+          part_of_speech?: string | null
+          reading?: string | null
+          status?: string
+          term: string
+          user_id: string
+          word_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          friend_id?: string
+          id?: string
+          jlpt?: string | null
+          line_en?: string | null
+          line_furigana?: string | null
+          line_id?: string | null
+          line_ja?: string
+          meaning_en?: string | null
+          meaning_id?: string | null
+          part_of_speech?: string | null
+          reading?: string | null
+          status?: string
+          term?: string
+          user_id?: string
+          word_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_suggestions_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_suggestions_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friends: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          persona: string | null
+          relationship: string
+          source_id: string
+          themes: string[]
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          persona?: string | null
+          relationship: string
+          source_id: string
+          themes?: string[]
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          persona?: string | null
+          relationship?: string
+          source_id?: string
+          themes?: string[]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friends_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_logs: {
         Row: {
           id: string

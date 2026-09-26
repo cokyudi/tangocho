@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -5,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Furigana from '@/components/Furigana';
 import { createClient } from '@/lib/supabase/server';
 import { masteryLevel, isDue } from '@/lib/mastery';
+import TodaysWords, { TodaysWordsSkeleton } from '@/components/home/TodaysWords';
 
 export default async function Home() {
   const supabase = await createClient();
@@ -56,6 +58,15 @@ export default async function Home() {
         <Button href="/practice" variant="neutral" className="flex-1">
           {dueCount > 0 ? `Practice (${dueCount} due)` : 'Start practice'}
         </Button>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-bold text-ink">
+          Today’s words <span className="font-jp text-sm text-accent">今日の単語</span>
+        </h2>
+        <Suspense fallback={<TodaysWordsSkeleton />}>
+          <TodaysWords />
+        </Suspense>
       </section>
 
       <section className="space-y-3">
