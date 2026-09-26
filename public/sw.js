@@ -55,7 +55,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
   event.waitUntil(
-    self.registration.showNotification(data.title || 'tangocho', {
+    self.registration.showNotification(data.title || '今日の単語', {
       body: data.body,
       icon: '/icons/icon-192.png',
       data: { url: data.url || '/' },

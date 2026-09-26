@@ -113,8 +113,8 @@ export async function sendTestPush(): Promise<Result> {
   const { data: subs } = await ctx.supabase.from('push_subscriptions').select('endpoint, p256dh, auth');
   if (!subs?.length) return { ok: false, error: 'No device has notifications on' };
   const sent = await sendPush(ctx.supabase, subs, {
-    title: 'tangocho',
-    body: 'Notifications are on. Friend words arrive at 07:00.',
+    title: 'Notifications are on',
+    body: 'Your friends’ words arrive at 07:00 every day.',
     url: '/friends',
   });
   return sent ? { ok: true } : { ok: false, error: 'Push failed — check the server log' };
