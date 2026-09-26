@@ -217,6 +217,9 @@ daily_suggestions
 
 **Push:** the Phase 6 cron pre-generates the set at 07:00 and sends the first friend line as a notification.
 
+**Unanswered words expire (decided 2026-09-26):** each set belongs to its Tokyo date, so the next day's set replaces it on Home. Words left untouched — ignored, or a day the app wasn't opened even though the 07:00 cron created them — stay `pending` forever: never shown again, never re-suggested (dedupe includes them), not fed to the prompt as feedback, and excluded from the Progress save rate. Kept simple on purpose: I'll open the app daily (the push is the nudge).
+- **Idea if missed days start to bother me:** carry unanswered words from the last 2 days onto Home under a "From yesterday" label; older ones still expire, so a week away can't pile up. Home reads 3 days instead of 1 and groups by date; "Not today" skips the carried-over ones too.
+
 **Idea — RAG for related picks (not needed yet, noted 2026-09-26):** today the prompt is plain context stuffing (friends, 30 recent words, every seen term, last 20 reactions); Jisho validates after. Real RAG would embed `words` (Supabase pgvector, free tier) and retrieve the saved words most related to each friend's themes, so picks build on known vocab by meaning (会議, 資料 → 議事録). No need to start early: embeddings are derived from `words` and can be backfilled any time; the learning signal (saved words + source, suggestion statuses, `review_logs`) is already recorded — so never delete `daily_suggestions` rows (to free a day for testing, move them to another date).
 - **Triggers (any one):**
   1. Picks feel disconnected from what I've been learning (e.g. lots of meeting vocab saved, still random nouns) — the main one.
