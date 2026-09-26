@@ -209,7 +209,13 @@ daily_suggestions
 
 **Later:** Phase 6 push can carry today's words ("田中: 「…」") once the cron exists.
 
-**Idea — RAG for related picks (not needed yet, noted 2026-09-26):** today the prompt is plain context stuffing (friends, 30 recent words, every seen term, last 20 reactions); Jisho validates after. Real RAG would embed `words` (Supabase pgvector, free tier) and retrieve the saved words most related to each friend's themes, so picks build on known vocab by meaning (会議, 資料 → 議事録). Add when suggestions feel random/unconnected, or when the seen-term list gets large (~2k+ words); at that size first drop the "never pick" list from the prompt, since dedupe is already enforced in code.
+**Idea — RAG for related picks (not needed yet, noted 2026-09-26):** today the prompt is plain context stuffing (friends, 30 recent words, every seen term, last 20 reactions); Jisho validates after. Real RAG would embed `words` (Supabase pgvector, free tier) and retrieve the saved words most related to each friend's themes, so picks build on known vocab by meaning (会議, 資料 → 議事録). No need to start early: embeddings are derived from `words` and can be backfilled any time; the learning signal (saved words + source, suggestion statuses, `review_logs`) is already recorded — so never delete `daily_suggestions` rows (to free a day for testing, move them to another date).
+- **Triggers (any one):**
+  1. Picks feel disconnected from what I've been learning (e.g. lots of meeting vocab saved, still random nouns) — the main one.
+  2. Save rate drops: over 2–3 weeks most suggestions end `skipped` rather than `saved` (one SQL query on `daily_suggestions`).
+  3. Near-duplicates slip through (見送り after knowing 見送る) — code dedupe is exact-match only.
+  4. ~2k saved words: first just drop the "never pick" list from the prompt (dedupe is enforced in code), RAG after.
+- **Not triggers:** too easy/hard (prompt tuning) or a friend's voice feeling off (persona/themes).
 
 - **Verify:** add a friend + a coworker → Home shows 4 words with lines in the right register; save 2 → they appear in Browse under the friend's source; mark 1 Known → not in Browse, not suggested again; reload → no regeneration; next day → new set, none duplicated.
 
