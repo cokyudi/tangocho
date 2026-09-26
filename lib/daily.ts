@@ -46,23 +46,33 @@ const SEASONS = [
   'autumn (紅葉, 読書の秋, ハロウィン)', 'late autumn (七五三, 紅葉狩り, 鍋)', 'winter (忘年会, クリスマス, 大掃除)',
 ];
 
-// Keep items that Jisho confirms (its reading/meaning win) or that Gemini
-// flags as slang; drop words already saved or suggested, and repeats.
+// Keep items that Jisho confirms or that Gemini flags as slang; drop words
+// already saved or suggested, and repeats. Jisho's reading/POS always win; its
+// meaning and JLPT only for non-slang, since for slang it has the literal
+// sense (草 → "grass", N4, instead of "lol").
 export function keepSuggestions(
   items: GeneratedItem[],
   jisho: (JishoEntry | null)[],
   seen: Set<string>,
   friendCount: number,
 ) {
-  const kept: (GeneratedItem & { jisho: JishoEntry | null })[] = [];
+  const kept: (Omit<GeneratedItem, 'jlpt'> & { jlpt: string | null })[] = [];
   const taken = new Set(seen);
   items.forEach((item, i) => {
     const term = item.term.trim();
+    const j = jisho[i];
     if (!term || taken.has(term)) return;
     if (item.friendIndex < 0 || item.friendIndex >= friendCount) return;
-    if (!jisho[i] && !item.slang) return;
+    if (!j && !item.slang) return;
     taken.add(term);
-    kept.push({ ...item, term, jisho: jisho[i] });
+    kept.push({
+      ...item,
+      term,
+      reading: j?.reading ?? item.reading,
+      partOfSpeech: j?.partOfSpeech ?? item.partOfSpeech,
+      meaningEn: (!item.slang && j?.meaningEn) || item.meaningEn,
+      jlpt: item.slang ? null : (j?.jlpt ?? item.jlpt),
+    });
   });
   return kept.slice(0, DAILY_COUNT);
 }
@@ -127,7 +137,8 @@ async function generate(supabase: Supabase, userId: string, date: string) {
         ? `- Recent reactions (skipped = not wanted, known = too easy, saved = good pick): ` +
           `${feedback.map((f) => `${f.term}:${f.status}`).join(', ')}.\n`
         : '') +
-      `- Real, commonly used words only; mark slang honestly.`,
+      `- Real, commonly used words only; mark slang honestly.\n` +
+      `- Lines name real-sounding people or things, never placeholders like 〇〇.`,
   });
 
   const jisho = await Promise.all(object.items.map((it) => lookupJisho(it.term.trim())));
@@ -142,11 +153,11 @@ async function generate(supabase: Supabase, userId: string, date: string) {
       date,
       friend_id: friends[it.friendIndex].id,
       term: it.term,
-      reading: it.jisho?.reading ?? it.reading,
-      meaning_en: it.jisho?.meaningEn ?? it.meaningEn,
+      reading: it.reading,
+      meaning_en: it.meaningEn,
       meaning_id: it.meaningId,
-      part_of_speech: it.jisho?.partOfSpeech ?? it.partOfSpeech,
-      jlpt: it.jisho?.jlpt ?? it.jlpt,
+      part_of_speech: it.partOfSpeech,
+      jlpt: it.jlpt,
       line_ja: it.lineJa,
       line_furigana: it.lineFurigana,
       line_en: it.lineEn,

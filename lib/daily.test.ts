@@ -43,4 +43,18 @@ describe('keepSuggestions', () => {
     const items = ['一', '二', '三', '四', '五'].map((t) => item(t));
     expect(keepSuggestions(items, items.map(() => hit), new Set(), 1)).toHaveLength(4);
   });
+
+  it('takes reading/POS from Jisho, but keeps the slang meaning and no JLPT for slang', () => {
+    const jisho = { reading: 'くさ', meaningEn: 'grass', partOfSpeech: 'Noun', jlpt: 'N4' };
+    const [slang] = keepSuggestions(
+      [item('草', { slang: true, reading: 'kusa?', meaningEn: 'lol', jlpt: 'N1' })],
+      [jisho],
+      new Set(),
+      1,
+    );
+    expect(slang).toMatchObject({ reading: 'くさ', partOfSpeech: 'Noun', meaningEn: 'lol', jlpt: null });
+
+    const [plain] = keepSuggestions([item('行楽', { meaningEn: 'trip' })], [{ ...jisho, meaningEn: 'outing', jlpt: 'N2' }], new Set(), 1);
+    expect(plain).toMatchObject({ meaningEn: 'outing', jlpt: 'N2' });
+  });
 });
