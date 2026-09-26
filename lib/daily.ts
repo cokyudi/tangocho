@@ -93,11 +93,19 @@ async function generate(supabase: Supabase, userId: string, date: string) {
   const recent = (words ?? []).slice(0, 30).map((w) => w.term);
   const feedback = (past ?? []).filter((p) => p.status !== 'pending').slice(0, 20);
 
+  // Difficulty by relationship: JLPT covers textbook/written Japanese only, so
+  // it targets coworkers; slang has no level and is judged by not being basic.
+  const COWORKER =
+    'coworker: polite/business Japanese (です・ます, keigo). Words at JLPT N2–N1 level or business ' +
+    'vocabulary heard in meetings but not taught early (稟議, 前倒し, 落とし所)';
+  const FRIEND =
+    'close friend: casual Japanese (タメ口). Everyday slang and colloquial expressions textbooks skip ' +
+    '(ワンチャン, ガチ, 詰んだ, エモい), no JLPT level needed — never basic words';
   const month = Number(date.slice(5, 7)) - 1;
   const friendList = friends
     .map(
       (f, i) =>
-        `${i}. ${f.name} — ${f.relationship === 'coworker' ? 'coworker: polite/business Japanese (です・ます, office expressions)' : 'close friend: casual Japanese (タメ口)'}; ` +
+        `${i}. ${f.name} — ${f.relationship === 'coworker' ? COWORKER : FRIEND}; ` +
         `themes: ${f.themes.join(', ') || 'anything'}; persona: ${f.persona ?? 'none'}`,
     )
     .join('\n');
@@ -106,12 +114,13 @@ async function generate(supabase: Supabase, userId: string, date: string) {
     model: google(MODEL),
     schema: suggestionSchema,
     prompt:
-      `You pick ${DAILY_COUNT} Japanese words for an intermediate learner living in Japan, who wants words ` +
+      `You pick ${DAILY_COUNT} Japanese words for an upper-intermediate learner living in Japan, who wants words ` +
       `they will actually hear. Each word is mentioned by one of these friends in a short, natural one-line ` +
       `message to the learner, written in that friend's speech level and drawn from their themes and persona:\n` +
       `${friendList}\n\n` +
       `- Items 1-${DAILY_COUNT - 1}: spread across the friends, each word from that friend's themes.\n` +
-      `- Item ${DAILY_COUNT}: a word tied to today's season — ${SEASONS[month]} (today is ${date}) — said by any friend.\n` +
+      `- Item ${DAILY_COUNT}: a word tied to today's season — ${SEASONS[month]} (today is ${date}) — said by any friend, at that friend's difficulty.\n` +
+      `- Too easy: common everyday words a learner meets early (台風, 推し, 気まずい). Skip them.\n` +
       `- Prefer words that build on ones the learner saved recently (shared kanji or topic): ${recent.join('、') || 'none yet'}.\n` +
       `- Never pick any of these (already known or suggested): ${[...seen].join('、') || 'none'}.\n` +
       (feedback.length
