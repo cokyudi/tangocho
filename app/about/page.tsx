@@ -3,7 +3,7 @@ import AboutContent from '@/components/about/AboutContent';
 
 const BASE_URL = 'https://tangocho.yudidputra.com';
 const description =
-  'tangocho (単語帳) is a Japanese vocabulary tracker: capture words with AI auto-fill, remember where you learned them, review with SM-2 spaced repetition, and practise saying them out loud.';
+  'tangocho (単語帳) is a Japanese vocabulary tracker: capture words with AI auto-fill, remember where you learned them, get daily words from AI friends, review with SM-2 spaced repetition, and practise saying them out loud.';
 
 export const metadata: Metadata = {
   title: 'tangocho — Japanese vocabulary tracker with spaced repetition',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     description,
     locale: 'en_US',
     images: [
-      { url: '/screenshots/home.png', width: 1280, height: 720, alt: 'tangocho home dashboard' },
+      { url: '/screenshots/home.png', width: 500, height: 907, alt: 'tangocho home with today’s words from AI friends' },
     ],
   },
   twitter: {

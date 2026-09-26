@@ -18,8 +18,8 @@ export default function PhoneFrame({
       <Image
         src={src}
         alt={alt}
-        width={432}
-        height={936}
+        width={500}
+        height={907}
         priority={priority}
         sizes="(min-width: 640px) 260px, 80vw"
         className="block h-auto w-full"

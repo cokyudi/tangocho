@@ -11,7 +11,7 @@ import SourceMarquee from '@/components/about/SourceMarquee';
 import ScreenshotCarousel from '@/components/about/ScreenshotCarousel';
 import { useAboutLanguage } from '@/components/about/useAboutLanguage';
 
-const SHOT_ORDER = ['capture', 'browse', 'detail', 'practice', 'speak', 'progress', 'home'] as const;
+const SHOT_ORDER = ['home', 'capture', 'browse', 'detail', 'practice', 'speak', 'friends', 'progress'] as const;
 
 const stack = [
   'Next.js 16 (App Router)',
@@ -22,6 +22,8 @@ const stack = [
   'Jisho API',
   'SM-2 algorithm',
   'Web Speech API',
+  'Web Push',
+  'Vercel Cron',
   'Tailwind CSS',
   'PWA',
 ];
