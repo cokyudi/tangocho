@@ -12,6 +12,17 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
+    date: '2026-09-28',
+    en: {
+      title: 'Smarter morning notification',
+      body: 'The 07:00 push now only counts words I haven’t answered yet — open the app after midnight and deal with the day’s words, and the morning push won’t repeat them.',
+    },
+    ja: {
+      title: '朝の通知を改善',
+      body: '7時の通知は、まだ答えていない単語だけを数えるように。深夜にアプリを開いてその日の単語を処理しても、朝の通知で同じ単語が出ない。',
+    },
+  },
+  {
     date: '2026-09-26',
     en: {
       title: 'Daily notification at 07:00',
