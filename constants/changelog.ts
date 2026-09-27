@@ -1,5 +1,5 @@
 // Public update history for /about (latest few) and /changelog (all).
-// Newest first. One entry per user-visible feature, not per fix.
+// Newest first. One entry per user-visible feature or noticeable fix.
 
 type Text = { title: string; body: string };
 
