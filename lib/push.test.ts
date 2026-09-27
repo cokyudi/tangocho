@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { dailyPayload } from './push';
 
-const ken = { line_ja: '昨日ゲームに没頭しすぎた。', friends: { name: 'ケン' } };
+const ken = { line_ja: '昨日ゲームに没頭しすぎた。', status: 'pending', friends: { name: 'ケン' } };
+const done = { line_ja: 'もう決めた。', status: 'saved', friends: { name: '佐藤さん' } };
 
 describe('dailyPayload', () => {
   it('leads with the first friend line and counts words and dues', () => {
@@ -18,5 +19,11 @@ describe('dailyPayload', () => {
 
   it('sends nothing when there is nothing to do', () => {
     expect(dailyPayload([], 0)).toBeNull();
+  });
+
+  it('ignores words already decided before the push', () => {
+    expect(dailyPayload([done, ken], 0)).toMatchObject({ title: 'ケン: 「昨日ゲームに没頭しすぎた。」', body: '1 new word' });
+    expect(dailyPayload([done], 2)).toMatchObject({ title: '今日の復習', body: '2 due' });
+    expect(dailyPayload([done], 0)).toBeNull();
   });
 });

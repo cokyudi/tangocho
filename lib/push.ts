@@ -32,16 +32,18 @@ export async function sendPush(supabase: SupabaseClient<Database>, subs: Subscri
   return sent;
 }
 
-// One daily push: the first friend's line, plus counts.
+// One daily push: the first unanswered friend line, plus counts. Words already
+// decided (e.g. opened after midnight) don't count.
 export function dailyPayload(
-  suggestions: { line_ja: string; friends: { name: string } | null }[],
+  suggestions: { line_ja: string; status: string; friends: { name: string } | null }[],
   due: number,
 ): PushPayload | null {
-  const counts = [suggestions.length && `${suggestions.length} new words`, due && `${due} due`]
+  const pending = suggestions.filter((s) => s.status === 'pending');
+  const counts = [pending.length && `${pending.length} new word${pending.length === 1 ? '' : 's'}`, due && `${due} due`]
     .filter(Boolean)
     .join(' · ');
   if (!counts) return null;
-  const first = suggestions[0];
+  const first = pending[0];
   return {
     title: first ? `${first.friends?.name ?? '友達'}: 「${first.line_ja}」` : '今日の復習',
     body: counts,
