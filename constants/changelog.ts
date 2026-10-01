@@ -12,6 +12,17 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
+    date: '2026-10-02',
+    en: {
+      title: 'Meet the omamori',
+      body: 'A small pixel お守り with 守 on it now cheers when nothing is due for review, and holds up a card when the word list is empty.',
+    },
+    ja: {
+      title: 'お守りが登場',
+      body: '「守」と書かれた小さなピクセルのお守りが、復習がないときは喜び、単語がまだないときはカードを掲げて迎えてくれる。',
+    },
+  },
+  {
     date: '2026-09-28',
     en: {
       title: 'Smarter morning notification',

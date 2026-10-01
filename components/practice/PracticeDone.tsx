@@ -1,8 +1,10 @@
 import Button from '@/components/ui/Button';
+import Mascot from '@/components/ui/Mascot';
 
 export default function PracticeDone({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
+      <Mascot pose="celebrate" />
       <h1 className="font-display text-3xl font-bold text-ink">{title}</h1>
       <p className="max-w-sm text-muted">{subtitle}</p>
       <div className="flex gap-3">

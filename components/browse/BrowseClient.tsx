@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { LayoutGrid, Table as TableIcon } from 'lucide-react';
 import Card from '@/components/ui/Card';
+import Mascot from '@/components/ui/Mascot';
 import EditWordModal from '@/components/browse/EditWordModal';
 import WordDetailSheet from '@/components/browse/WordDetailSheet';
 import BrowseFilters from '@/components/browse/BrowseFilters';
@@ -42,13 +43,16 @@ export default function BrowseClient({
       <BrowseFilters sources={sources} {...filters} />
 
       {filtered.length === 0 ? (
-        <Card className="p-8 text-center text-muted">
+        <Card className="flex flex-col items-center gap-3 p-8 text-center text-muted">
           {words.length === 0 ? (
             <>
-              No words yet.{' '}
-              <Link href="/capture" className="font-display font-bold text-accent">
-                Add your first →
-              </Link>
+              <Mascot pose="card" />
+              <span>
+                No words yet.{' '}
+                <Link href="/capture" className="font-display font-bold text-accent">
+                  Add your first →
+                </Link>
+              </span>
             </>
           ) : (
             'No words match these filters.'
