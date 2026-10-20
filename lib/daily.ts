@@ -25,6 +25,16 @@ const suggestionSchema = z.object({
         partOfSpeech: z.string().nullable(),
         jlpt: z.enum(['N5', 'N4', 'N3', 'N2', 'N1']).nullable(),
         slang: z.boolean().describe('True only for slang/colloquial words a dictionary may not list'),
+        commonness: z
+          .number()
+          .int()
+          .min(1)
+          .max(5)
+          .describe(
+            'How often a Japanese person in their 20s-30s actually says or hears this word in daily life or ' +
+              'work today: 1 = known but rarely said (set phrases, written/literary, dated slang, e.g. 食い倒れ, ' +
+              '肝要, リア充), 3 = comes up now and then, 5 = heard every week. Be strict.',
+          ),
         lineJa: z.string().describe("The friend's one-line message using the word, in their speech level"),
         lineFurigana: z
           .string()
@@ -50,7 +60,7 @@ const SEASONS = [
 ];
 
 // Keep items that Jisho confirms or that Gemini flags as slang; drop words
-// already saved or suggested, and repeats. Jisho's reading/POS always win; its
+// rarely said in real life, words already saved or suggested, and repeats. Jisho's reading/POS always win; its
 // meaning and JLPT only for non-slang, since for slang it has the literal
 // sense (草 → "grass", N4, instead of "lol").
 export function keepSuggestions(
@@ -64,7 +74,7 @@ export function keepSuggestions(
   items.forEach((item, i) => {
     const term = item.term.trim();
     const j = jisho[i];
-    if (!term || taken.has(term)) return;
+    if (!term || taken.has(term) || item.commonness < 3) return;
     if (item.friendIndex < 0 || item.friendIndex >= friendCount) return;
     if (!j && !item.slang) return;
     taken.add(term);
@@ -110,6 +120,8 @@ async function generate(supabase: Supabase, userId: string, date: string) {
   const seen = new Set([...(words ?? []), ...(past ?? [])].map((w) => w.term));
   const recent = (words ?? []).slice(0, 30).map((w) => w.term);
   const feedback = (past ?? []).filter((p) => p.status !== 'pending').slice(0, 20);
+  // Every word flagged as not really used, not just recent ones: it's rare, explicit feedback.
+  const unused = (past ?? []).filter((p) => p.status === 'unused').map((p) => p.term);
 
   // Difficulty by relationship: JLPT covers textbook/written Japanese only, so
   // it targets coworkers; slang has no level and is judged by not being basic.
@@ -142,10 +154,14 @@ async function generate(supabase: Supabase, userId: string, date: string) {
       `- Prefer words that build on ones the learner saved recently (shared kanji or topic): ${recent.join('、') || 'none yet'}.\n` +
       `- Never pick any of these (already known or suggested): ${[...seen].join('、') || 'none'}.\n` +
       (feedback.length
-        ? `- Recent reactions (skipped = not wanted, known = too easy, saved = good pick): ` +
+        ? `- Recent reactions (skipped = not wanted, known = too easy, saved = good pick, ` +
+          `unused = native speakers don't actually say it): ` +
           `${feedback.map((f) => `${f.term}:${f.status}`).join(', ')}.\n`
         : '') +
-      `- Real, commonly used words only; mark slang honestly.\n` +
+      (unused.length
+        ? `- Native speakers said nobody really uses these; avoid words like them: ${unused.join('、')}.\n`
+        : '') +
+      `- Words people actually say today, not just dictionary words; mark slang honestly.\n` +
       `- Lines name real-sounding people or things, never placeholders like 〇〇.`,
   });
 

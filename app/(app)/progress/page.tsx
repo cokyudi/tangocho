@@ -26,8 +26,10 @@ export default async function ProgressPage() {
 
   // Friend words, last 30 days. Mostly skipped = picks miss the mark (a RAG trigger, see SPEC).
   const decided = suggestions ?? [];
-  const friendStats = (['saved', 'known', 'skipped'] as const).map((status) => ({
-    label: status[0].toUpperCase() + status.slice(1),
+  const friendStats = (
+    [['saved', 'Saved'], ['known', 'Known'], ['skipped', 'Skipped'], ['unused', 'Not used']] as const
+  ).map(([status, label]) => ({
+    label,
     value: decided.filter((s) => s.status === status).length,
   }));
   const saveRate = decided.length ? Math.round((friendStats[0].value / decided.length) * 100) : null;
@@ -130,7 +132,7 @@ export default async function ProgressPage() {
             <p className="py-2 text-center text-muted">No friend words decided yet.</p>
           ) : (
             <>
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-4 gap-3 text-center">
                 {friendStats.map((s) => (
                   <div key={s.label}>
                     <span className="block font-display text-2xl font-bold text-ink">{s.value}</span>

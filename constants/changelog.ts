@@ -12,6 +12,17 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
+    date: '2026-10-20',
+    en: {
+      title: 'Friend words people actually say',
+      body: 'A Japanese coworker pointed out some daily words nobody really uses (食い倒れ, for one). Friends now skip dictionary-only words, and a new “Not used” button teaches them which words to avoid.',
+    },
+    ja: {
+      title: '実際に使われる言葉だけに',
+      body: '日本人の同僚に「それ、普段使わないよ」と言われた言葉（食い倒れなど）があった。友達は辞書にしか出てこない言葉を避けるようになり、新しい「Not used」ボタンで使われない言葉を教えられるようになった。',
+    },
+  },
+  {
     date: '2026-10-02',
     en: {
       title: 'Meet the omamori',

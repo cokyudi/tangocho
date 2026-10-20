@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { saveSuggestions, markKnown, skipRest } from '@/app/(app)/actions';
+import { saveSuggestions, markSuggestion, skipRest } from '@/app/(app)/actions';
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -33,7 +33,8 @@ export function useTodaysWords() {
     toggleSelected: (id: string) => setSelected((s) => toggle(s, id)),
     toggleRevealed: (id: string) => setRevealed((s) => toggle(s, id)),
     save: () => run(() => saveSuggestions([...selected])),
-    known: (id: string) => run(() => markKnown(id)),
+    known: (id: string) => run(() => markSuggestion(id, 'known')),
+    unused: (id: string) => run(() => markSuggestion(id, 'unused')),
     skip: () => run(skipRest),
   };
 }

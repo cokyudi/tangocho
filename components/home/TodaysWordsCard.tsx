@@ -10,7 +10,9 @@ import FuriganaText from '@/components/FuriganaText';
 import { useTodaysWords } from '@/components/home/useTodaysWords';
 import type { Suggestion } from '@/lib/daily';
 
-const STATUS_LABEL: Record<string, string> = { saved: 'Saved', known: 'Known', skipped: 'Skipped' };
+const STATUS_LABEL: Record<string, string> = { saved: 'Saved', known: 'Known', skipped: 'Skipped', unused: 'Not used' };
+const REACTION =
+  'h-fit border-2 border-ink bg-surface px-2 py-1 font-display text-xs font-bold text-fg shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5';
 
 export default function TodaysWordsCard({ suggestions }: { suggestions: Suggestion[] }) {
   const t = useTodaysWords();
@@ -60,14 +62,20 @@ export default function TodaysWordsCard({ suggestions }: { suggestions: Suggesti
               </button>
             </div>
             {open && (
-              <button
-                type="button"
-                onClick={() => t.known(s.id)}
-                disabled={t.busy}
-                className="h-fit shrink-0 border-2 border-ink bg-surface px-2 py-1 font-display text-xs font-bold text-fg shadow-retro-sm hover:-translate-x-0.5 hover:-translate-y-0.5"
-              >
-                Known
-              </button>
+              <div className="flex shrink-0 flex-col gap-2">
+                <button type="button" onClick={() => t.known(s.id)} disabled={t.busy} className={REACTION}>
+                  Known
+                </button>
+                <button
+                  type="button"
+                  onClick={() => t.unused(s.id)}
+                  disabled={t.busy}
+                  title="Japanese people don't really say this"
+                  className={REACTION}
+                >
+                  Not used
+                </button>
+              </div>
             )}
           </div>
         );

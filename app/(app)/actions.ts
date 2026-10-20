@@ -53,14 +53,16 @@ export async function saveSuggestions(ids: string[]): Promise<Result> {
   return skipRest();
 }
 
-// Already known: not added to the word list; the status alone steers future picks.
-export async function markKnown(id: string): Promise<Result> {
+// Already known, or not something people actually say: not added to the word
+// list; the status alone steers future picks.
+export async function markSuggestion(id: string, status: 'known' | 'unused'): Promise<Result> {
   const ctx = await authed();
   if (!ctx) return { ok: false, error: 'Unauthorized' };
+  if (status !== 'known' && status !== 'unused') return { ok: false, error: 'Invalid status' };
 
   const { error } = await ctx.supabase
     .from('daily_suggestions')
-    .update({ status: 'known' })
+    .update({ status })
     .eq('id', id)
     .eq('status', 'pending');
   if (error) return { ok: false, error: error.message };

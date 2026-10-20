@@ -10,6 +10,7 @@ const item = (term: string, over: Partial<GeneratedItem> = {}): GeneratedItem =>
   partOfSpeech: null,
   jlpt: null,
   slang: false,
+  commonness: 4,
   lineJa: '',
   lineFurigana: '',
   lineEn: '',
@@ -27,6 +28,16 @@ describe('keepSuggestions', () => {
       1,
     );
     expect(kept.map((k) => k.term)).toEqual(['稟議', 'エモい']);
+  });
+
+  it('drops words rarely said in real life', () => {
+    const kept = keepSuggestions(
+      [item('食い倒れ', { commonness: 2 }), item('議事録', { commonness: 3 })],
+      [hit, hit],
+      new Set(),
+      1,
+    );
+    expect(kept.map((k) => k.term)).toEqual(['議事録']);
   });
 
   it('drops words already seen, repeats within the batch, and bad friend indexes', () => {
